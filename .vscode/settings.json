@@ -1,6 +1,10 @@
 {
     "files.associations": {
         "raylib.h": "c",
-        "player.h": "c"
+        "player.h": "c",
+        "sprites.h": "c",
+        "main.h": "c",
+        "animations.h": "c",
+        "animation.h": "c"
     }
 }

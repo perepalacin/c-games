@@ -1,0 +1,14 @@
+# .clang-format
+Language: C
+BasedOnStyle: Google # Or LLVM, Chromium, Mozilla, WebKit
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+AllowShortIfStatementsOnASingleLine: false
+BreakBeforeBraces: Attach
+ColumnLimit: 80 # A common convention, adjust as needed
+# For enums, clang-format doesn't have a direct option to *mandate* a trailing comma.
+# It typically follows the C standard where it's optional for the last item.
+# However, you can enforce other enum formatting:
+BreakBeforeBraces: Attach
+AlignTrailingComments: true
