@@ -2,38 +2,42 @@
 #define PLAYER_H
 
 #include "raylib.h"
+#include <stdio.h>
 
 typedef enum {
-    MALE_PLAYER_IDLE, 
+    MALE_PLAYER_IDLE_UP, 
+    MALE_PLAYER_IDLE_RIGHT, 
+    MALE_PLAYER_IDLE_DOWN, 
+    MALE_PLAYER_IDLE_LEFT, 
     MALE_PLAYER_WALK_UP,
+    MALE_PLAYER_WALK_RIGHT,
     MALE_PLAYER_WALK_DOWN,
     MALE_PLAYER_WALK_LEFT,
-    MALE_PLAYER_WALK_RIGHT,
     MALE_PLAYER_RUN_UP,
+    MALE_PLAYER_RUN_RIGHT,
     MALE_PLAYER_RUN_DOWN,
     MALE_PLAYER_RUN_LEFT,
-    MALE_PLAYER_RUN_RIGHT,
     MALE_PLAYER_CYCLE_UP,
+    MALE_PLAYER_CYCLE_RIGHT,
     MALE_PLAYER_CYCLE_DOWN,
     MALE_PLAYER_CYCLE_LEFT,
-    MALE_PLAYER_CYCLE_RIGHT,
     MALE_PLAYER_FISHING_UP,
+    MALE_PLAYER_FISHING_RIGHT,
     MALE_PLAYER_FISHING_DOWN,
     MALE_PLAYER_FISHING_LEFT,
-    MALE_PLAYER_FISHING_RIGHT,
     // Female and more
     NUM_PLAYER_ACTIONS,
 } PlayerAction;
 
 typedef struct {
-    Rectangle frames[5];
+    Rectangle *frames;
+    int frames_len;        
     int frames_per_second;
-    int frames_count;
-} PlayerAnimations;
+} CharacterAnimationData;
 
 
-void UpdateDrawFrame(void);
 void LoadPlayerTextures(void);
 void DrawPlayer(void);
+void UpdatePlayerState(void);
 
 #endif

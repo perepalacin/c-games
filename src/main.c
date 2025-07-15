@@ -20,17 +20,11 @@ int main(void)
     SetTargetFPS(TARGET_FPS);
     LoadPlayerTextures();
 
-    while (!WindowShouldClose())
-    {
+    while (!WindowShouldClose()) {
         BeginDrawing();
-
         ClearBackground(RAYWHITE);
-
         DrawPlayer();
-        // if (IsKeyDown(KEY_W)) {
-        //     update_player_sprite();
-        // }
-
+        UpdatePlayerState();
         EndDrawing();
     }
 

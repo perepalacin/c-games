@@ -3,12 +3,10 @@
 
 #include "raylib.h"
 
-typedef struct SpriteAnimation
-{
+typedef struct {
 	Texture2D atlas;
 	int framesPerSecond;
 	float timeStarted;
-
 	Rectangle* rectangles;
 	int rectanglesLength;
 } SpriteAnimation;

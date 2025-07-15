@@ -5,6 +5,7 @@
         "sprites.h": "c",
         "main.h": "c",
         "animations.h": "c",
-        "animation.h": "c"
+        "animation.h": "c",
+        "stdlib.h": "c"
     }
 }
