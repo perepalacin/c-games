@@ -4,7 +4,6 @@
 
 Texture2D atlas;
 SpriteAnimation current_player_animation;
-const int PLAYER_WIDTH = 20;
 const int PLAYER_HEIGHT = 26;
 int player_direction = MALE_PLAYER_IDLE_DOWN;
 static CharacterAnimationData player_animations[NUM_PLAYER_ACTIONS];
@@ -225,7 +224,7 @@ void UpdatePlayerState(void) {
 }
 
 void DrawPlayer (void) {
-	Vector2 origin = { (PLAYER_WIDTH / 2), (PLAYER_HEIGHT / 2) }; // origin with respect to the sprite!
-	Rectangle dest = { (SCREEN_WIDTH / 2) - (PLAYER_WIDTH / 2), (SCREEN_HEIGHT / 2) - (PLAYER_HEIGHT / 2), PLAYER_WIDTH * 2, PLAYER_HEIGHT * 2 }; // Destination on the screen with respect to the origin of the sprite
+	Vector2 origin = { (GRID_SIZE / 2), (PLAYER_HEIGHT / 2) }; // origin with respect to the sprite!
+	Rectangle dest = { (SCREEN_WIDTH / 2) - (GRID_SIZE / 2), (SCREEN_HEIGHT / 2) - (PLAYER_HEIGHT / 2), GRID_SIZE * 2, PLAYER_HEIGHT * 2 }; // Destination on the screen with respect to the origin of the sprite
 	DrawSpriteAnimationPro(current_player_animation, dest, origin, 0, WHITE);
 }

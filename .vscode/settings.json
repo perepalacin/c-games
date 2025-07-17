@@ -6,6 +6,7 @@
         "main.h": "c",
         "animations.h": "c",
         "animation.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "camera.h": "c"
     }
 }
