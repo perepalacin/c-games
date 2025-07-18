@@ -1,11 +1,8 @@
-#include <stdlib.h>
-#include <time.h>
 
-#include "raylib.h"
 #include "entities/player.h"
 #include "graphics/camera.h"
+#include "world/maps.h"
 #include "main.h"
-// #include "raymath.h"
 
 
 const int SCREEN_WIDTH = 900;
@@ -20,7 +17,7 @@ int main(void)
 	srand(time(0));
     InitFreeCamera();
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "C Game Test");
-
+    InitMap();
     SetTargetFPS(TARGET_FPS);
     LoadPlayerTextures();
 
@@ -28,6 +25,7 @@ int main(void)
         BeginDrawing();
         ClearBackground(RAYWHITE);
         BeginMode2D(camera);
+        RenderMap();
         UpdateFreeCamera();
         UpdatePlayerState();
         DrawPlayer();
@@ -35,6 +33,8 @@ int main(void)
         EndDrawing();
     }
 
+    FreeMap();
+    UnloadTileAssets();
     CloseWindow();
 
     return 0;

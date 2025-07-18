@@ -5,7 +5,7 @@
 Texture2D atlas;
 SpriteAnimation current_player_animation;
 const int PLAYER_HEIGHT = 26;
-int player_direction = MALE_PLAYER_IDLE_DOWN;
+static int player_direction = MALE_PLAYER_IDLE_DOWN;
 static CharacterAnimationData player_animations[NUM_PLAYER_ACTIONS];
 
 static Rectangle male_player_idle_up_frames[] = {
