@@ -15,20 +15,21 @@ Camera2D camera = { 0 };
 int main(void)
 {
 	srand(time(0));
-    InitFreeCamera();
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "C Game Test");
+    InitFreeCamera();
+    LoadTileAssets();
     InitMap();
     SetTargetFPS(TARGET_FPS);
     LoadPlayerTextures();
 
     while (!WindowShouldClose()) {
+        UpdateFreeCamera();
+        UpdatePlayerState();
         BeginDrawing();
         ClearBackground(RAYWHITE);
         BeginMode2D(camera);
-        RenderMap();
-        UpdateFreeCamera();
-        UpdatePlayerState();
-        DrawPlayer();
+            RenderMap();
+            DrawPlayer();
         EndMode2D();
         EndDrawing();
     }
