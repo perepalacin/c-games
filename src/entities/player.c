@@ -4,6 +4,8 @@
 
 Texture2D atlas;
 SpriteAnimation current_player_animation;
+PlayerPos player_position;
+bool is_player_moving = 0;
 const int PLAYER_HEIGHT = 26;
 static int player_direction = MALE_PLAYER_IDLE_DOWN;
 static CharacterAnimationData player_animations[NUM_PLAYER_ACTIONS];
@@ -160,12 +162,14 @@ void loadSprites (void) {
 			.frames_len = 4,
 		};
 	}
+
+    player_position = (PlayerPos){ 0, 0};
 }
 
 void LoadPlayerTextures(void) {
     atlas = LoadTexture("./assets/sprites/player/players.png");
 	loadSprites();
-	CharacterAnimationData initial_data = player_animations[player_direction]; // Use the initial player_direction
+	CharacterAnimationData initial_data = player_animations[player_direction];
     current_player_animation = CreateSpriteAnimation(
         atlas,
         initial_data.frames_per_second,
@@ -195,23 +199,33 @@ void SetPlayerDirection (const int new_direction) {
 }
 
 void UpdatePlayerDirection (void) {
+    is_player_moving = 1;
     if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_W)) {
         SetPlayerDirection(MALE_PLAYER_RUN_UP);
+        player_position.y -= 10;
     } else if (IsKeyDown(KEY_W)) {
         SetPlayerDirection(MALE_PLAYER_WALK_UP);
+        player_position.y -= 5;
     } else if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_D)) {
+        player_position.x += 10;
         SetPlayerDirection(MALE_PLAYER_RUN_RIGHT);
     } else if (IsKeyDown(KEY_D)) {
         SetPlayerDirection(MALE_PLAYER_WALK_RIGHT);
+        player_position.x += 5;
     } else if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_S)) {
+        player_position.y += 10;
         SetPlayerDirection(MALE_PLAYER_RUN_DOWN);
     } else if (IsKeyDown(KEY_S)) {
+        player_position.y += 5;
         SetPlayerDirection(MALE_PLAYER_WALK_DOWN);
     } else if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_A)) {
+        player_position.x -= 10;
         SetPlayerDirection(MALE_PLAYER_RUN_LEFT);
     } else if (IsKeyDown(KEY_A)) {
+        player_position.x -= 5;
         SetPlayerDirection(MALE_PLAYER_WALK_LEFT);
     } else {
+        is_player_moving = 0;
         if (player_direction == MALE_PLAYER_WALK_UP || player_direction == MALE_PLAYER_RUN_UP) SetPlayerDirection(MALE_PLAYER_IDLE_UP);
         else if (player_direction == MALE_PLAYER_WALK_RIGHT || player_direction == MALE_PLAYER_RUN_RIGHT) SetPlayerDirection(MALE_PLAYER_IDLE_RIGHT);
         else if (player_direction == MALE_PLAYER_WALK_DOWN || player_direction == MALE_PLAYER_RUN_DOWN) SetPlayerDirection(MALE_PLAYER_IDLE_DOWN);
@@ -219,12 +233,38 @@ void UpdatePlayerDirection (void) {
     }
 }
 
+void UpdatePlayerPosition(void) {
+    if (GetPlayerDirection() == MALE_PLAYER_RUN_UP) {
+        player_position.y -= 2;
+    } else if (GetPlayerDirection() == MALE_PLAYER_WALK_UP) {
+        player_position.y -= 1;
+    } else if (GetPlayerDirection() == MALE_PLAYER_RUN_RIGHT) {
+        player_position.x += 2;
+    } else if (GetPlayerDirection() == MALE_PLAYER_WALK_RIGHT) {
+        player_position.x += 1;
+    } else if (GetPlayerDirection() == MALE_PLAYER_RUN_DOWN) {
+        player_position.y += 2;
+    } else if (GetPlayerDirection() == MALE_PLAYER_WALK_DOWN) {
+        player_position.y += 1;
+    } else if (GetPlayerDirection() == MALE_PLAYER_RUN_LEFT) {
+        player_position.x -= 2;
+    } else if (GetPlayerDirection() == MALE_PLAYER_WALK_LEFT) {
+        player_position.x -= 1;
+    } else {
+        return;
+    }
+    
+}
+
 void UpdatePlayerState(void) { 
-    UpdatePlayerDirection();
+    if (is_player_moving) {
+        UpdatePlayerPosition();
+    } else {
+        UpdatePlayerDirection();
+    }
 }
 
 void DrawPlayer (void) {
-	Vector2 origin = { (GRID_SIZE / 2), (PLAYER_HEIGHT / 2) }; // origin with respect to the sprite!
-	Rectangle dest = { (SCREEN_WIDTH / 2) - (GRID_SIZE / 2), (SCREEN_HEIGHT / 2) - (PLAYER_HEIGHT / 2), GRID_SIZE * 2, PLAYER_HEIGHT * 2 }; // Destination on the screen with respect to the origin of the sprite
-	DrawSpriteAnimationPro(current_player_animation, dest, origin, 0, WHITE);
+	Rectangle dest = { player_position.x, player_position.y, GRID_SIZE, PLAYER_HEIGHT }; // Destination on the screen with respect to the origin of the sprite
+	DrawSpriteAnimationPro(current_player_animation, dest, (Vector2) {0,PLAYER_HEIGHT}, 0, WHITE);
 }

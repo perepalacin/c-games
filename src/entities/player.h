@@ -30,6 +30,11 @@ typedef enum {
 } PlayerAction;
 
 typedef struct {
+    int x;
+    int y;
+} PlayerPos;
+
+typedef struct {
     Rectangle *frames;
     int frames_len;        
     int frames_per_second;
