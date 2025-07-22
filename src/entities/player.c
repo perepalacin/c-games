@@ -6,6 +6,7 @@ Texture2D atlas;
 SpriteAnimation current_player_animation;
 PlayerPos player_position;
 bool is_player_moving = 0;
+int pixels_moved = 0;
 const int PLAYER_HEIGHT = 26;
 static int player_direction = MALE_PLAYER_IDLE_DOWN;
 static CharacterAnimationData player_animations[NUM_PLAYER_ACTIONS];
@@ -202,27 +203,27 @@ void UpdatePlayerDirection (void) {
     is_player_moving = 1;
     if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_W)) {
         SetPlayerDirection(MALE_PLAYER_RUN_UP);
-        player_position.y -= 10;
+        player_position.y -= 4;
     } else if (IsKeyDown(KEY_W)) {
         SetPlayerDirection(MALE_PLAYER_WALK_UP);
-        player_position.y -= 5;
+        player_position.y -= 2;
     } else if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_D)) {
-        player_position.x += 10;
+        player_position.x += 4;
         SetPlayerDirection(MALE_PLAYER_RUN_RIGHT);
     } else if (IsKeyDown(KEY_D)) {
         SetPlayerDirection(MALE_PLAYER_WALK_RIGHT);
-        player_position.x += 5;
+        player_position.x += 2;
     } else if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_S)) {
-        player_position.y += 10;
+        player_position.y += 4;
         SetPlayerDirection(MALE_PLAYER_RUN_DOWN);
     } else if (IsKeyDown(KEY_S)) {
-        player_position.y += 5;
+        player_position.y += 2;
         SetPlayerDirection(MALE_PLAYER_WALK_DOWN);
     } else if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_A)) {
-        player_position.x -= 10;
+        player_position.x -= 4;
         SetPlayerDirection(MALE_PLAYER_RUN_LEFT);
     } else if (IsKeyDown(KEY_A)) {
-        player_position.x -= 5;
+        player_position.x -= 2;
         SetPlayerDirection(MALE_PLAYER_WALK_LEFT);
     } else {
         is_player_moving = 0;
@@ -236,22 +237,35 @@ void UpdatePlayerDirection (void) {
 void UpdatePlayerPosition(void) {
     if (GetPlayerDirection() == MALE_PLAYER_RUN_UP) {
         player_position.y -= 2;
+        pixels_moved += 2;
     } else if (GetPlayerDirection() == MALE_PLAYER_WALK_UP) {
         player_position.y -= 1;
+        pixels_moved += 1;
     } else if (GetPlayerDirection() == MALE_PLAYER_RUN_RIGHT) {
         player_position.x += 2;
+        pixels_moved += 2;
     } else if (GetPlayerDirection() == MALE_PLAYER_WALK_RIGHT) {
         player_position.x += 1;
+        pixels_moved += 1;
     } else if (GetPlayerDirection() == MALE_PLAYER_RUN_DOWN) {
         player_position.y += 2;
+        pixels_moved += 2;
     } else if (GetPlayerDirection() == MALE_PLAYER_WALK_DOWN) {
         player_position.y += 1;
+        pixels_moved += 1;
     } else if (GetPlayerDirection() == MALE_PLAYER_RUN_LEFT) {
         player_position.x -= 2;
+        pixels_moved += 2;
     } else if (GetPlayerDirection() == MALE_PLAYER_WALK_LEFT) {
         player_position.x -= 1;
+        pixels_moved += 1;
     } else {
         return;
+    }
+
+    if (pixels_moved == 32) {
+        is_player_moving = 0;
+        pixels_moved = 0;
     }
     
 }

@@ -90,8 +90,6 @@ void RenderMap(void) {
             if (tileId >= 0 && tileId < NUM_TILE_TYPES) {
                 MapTileDefinition def = tile_definitions[tileId];
                 DrawTextureRec(tileset_atlas, def.sprite_rectangle, (Vector2){x*def.tile_width, y*def.tile_height}, WHITE);
-            } else {
-                printf("Invalid tile ID encountered at (%d, %d): %d", x, y, tileId);
             }
         }
     }
@@ -102,8 +100,6 @@ void RenderMap(void) {
             if (tileId >= 0 && tileId < NUM_TILE_TYPES) {
                 MapTileDefinition def = tile_definitions[tileId];
                 DrawTextureRec(tileset_atlas, def.sprite_rectangle, (Vector2){x*def.tile_width, y*def.tile_height}, WHITE);
-            } else {
-                printf("Invalid tile ID encountered at (%d, %d): %d", x, y, tileId);
             }
         }
     }
