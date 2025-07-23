@@ -5,6 +5,7 @@
 #include "raylib.h"
 #include <stdio.h>
 #include <stdlib.h> 
+#include <string.h>
 
 typedef struct {
     Rectangle sprite_rectangle;
@@ -39,10 +40,25 @@ typedef enum {
     NUM_TILE_TYPES,
 } TileID;
 
+typedef struct {
+    int key;
+    MapTileDefinition* value; 
+} MapItem;
+
+typedef struct {
+    int size;
+    int count;
+    MapItem** items;
+} MapHashTable;
+
 void LoadTileAssets(void);
 void InitMap(void);
 void RenderMap(void);
 void FreeMap(void);
 void UnloadTileAssets(void);
+
+void MapHashTableInsert(MapHashTable* map, const int key, const MapTileDefinition* value);
+MapItem* MapHashTableSearch(MapHashTable* map, const int key);
+void MapHashTableDelete(MapHashTable* map, const int key);
 
 #endif

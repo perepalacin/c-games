@@ -7,6 +7,7 @@ MapCell **game_map;
 const int MAP_WIDTH = 30;       
 const int MAP_HEIGHT = 30;     
 const int TILE_SIZE = 20;      
+static MapItem HT_DELETED_ITEM = {0, NULL};
 
 void LoadTileAssets(void) {
     // tileset_atlas = LoadTexture("./assets/sprites/tiles/gen4_tileset.png");
@@ -128,4 +129,79 @@ void FreeMap(void) {
 
 void UnloadTileAssets(void) {
     UnloadTexture(tileset_atlas);
+}
+
+static MapHashTable* InitializeMapHashTable() {
+    MapHashTable* map = malloc(sizeof(MapHashTable));
+
+    map->size = 53;
+    map->count = 0;
+    map->items = calloc((size_t)map->size, sizeof(MapItem*));
+    return map;
+}
+
+unsigned int GenerateHashKey(int x_coord, int y_coord) {
+    return (x_coord*1000 + y_coord);
+}
+
+static MapItem* AddMapItem(const int k, const MapTileDefinition* map_tile_def) {
+    MapItem* i = malloc(sizeof(MapTileDefinition));
+    if (i == NULL) {
+        TraceLog(LOG_ERROR, "AddMapItem: Failed to allocate memory for MapItem.");
+        return NULL; 
+    }
+    i->key = k;
+    i->value = malloc(sizeof(MapTileDefinition));
+    if (i->value == NULL) {
+        TraceLog(LOG_ERROR, "AddMapItem: Failed to allocate memory for MapTileDefinition value.");
+        free(i); 
+        return NULL;
+    }
+
+    memcpy(i->value, map_tile_def, sizeof(MapTileDefinition));
+
+    return i; 
+}
+
+static void DeleteMapItem(MapItem* i) {
+    free(i->value);
+    free(i);
+}
+
+
+void DeleteMapHashTable(MapHashTable* map_hash_table) {
+    for (int i = 0; i < map_hash_table->size; i++) {
+        MapItem* map_item = map_hash_table->items[i];
+        if (map_item != NULL) {
+            DeleteMapItem(map_item);
+        }
+    }
+    free(map_hash_table->items);
+    free(map_hash_table);
+}
+
+void MapHashTableInsert(MapHashTable* map, const int key, const MapTileDefinition* value) {
+    MapItem* item = AddMapItem(key, value);
+    map->items[GenerateHashKey(1, 1)] = item;
+    map->count++;
+}
+
+MapItem* MapHashTableSearch(MapHashTable* map, const int coords) {
+    MapItem* map_item = map->items[GenerateHashKey(1, 1)];
+    if (map_item) {
+        return map_item;
+    }
+    return NULL;
+}
+
+void MapHashTableDelete(MapHashTable* map, const int coords) {
+    int key = GenerateHashKey(1,1);
+    MapItem* map_item = map->items[key];
+    if (map_item != NULL) {
+        if (map_item != &HT_DELETED_ITEM) {
+            DeleteMapItem(map_item);
+            map->items[key] = &HT_DELETED_ITEM;
+            map->count--;
+        }
+    }
 }
