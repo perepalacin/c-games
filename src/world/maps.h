@@ -7,30 +7,6 @@
 #include <stdlib.h> 
 #include <string.h>
 
-typedef struct {
-    Rectangle sprite_rectangle;
-    int tile_width;
-    int tile_height;
-} MapTileDefinition;
-
-typedef struct {
-    int tile_id;
-    bool is_walkable;
-    int event_id;   
-} Tile;
-
-typedef struct {
-    Tile ground_layer;    // Base layer: grass, dirt, water
-    Tile object_layer;    // Middle layer: trees, rocks, buildings (lower parts)
-    Tile overhead_layer;  // Top layer: roofs, bridge tops, tree leaves (drawn above player)
-    // You could add more layers for complex scenarios (e.g., shadows, weather effects)
-} MapCell;
-
-typedef enum {
-    EVENT_NONE,
-    EVENT_SPAWN,
-} EventId;
-
 typedef enum {
     GREEN_TREE_1,
     GREEN_TREE_2,
@@ -40,25 +16,32 @@ typedef enum {
     NUM_TILE_TYPES,
 } TileID;
 
-typedef struct {
-    int key;
-    MapTileDefinition* value; 
-} MapItem;
+typedef enum {
+    EVENT_NONE,
+    EVENT_SPAWN,
+} EventId;
 
 typedef struct {
-    int size;
-    int count;
-    MapItem** items;
-} MapHashTable;
+    Rectangle sprite_rectangle;
+    Vector2 sprite_origin;
+    int tile_width;
+    int tile_height;
+    int tile_id;
+    bool is_walkable;
+    int event_id;   
+} MapTileDefinition;
+
+typedef struct {
+    MapTileDefinition ground_layer;  
+    MapTileDefinition folliage_layer;
+    MapTileDefinition object_layer;  
+    // could add the weather layer for clouds, rain and such
+} MapCell;
 
 void LoadTileAssets(void);
 void InitMap(void);
 void RenderMap(void);
 void FreeMap(void);
 void UnloadTileAssets(void);
-
-void MapHashTableInsert(MapHashTable* map, const int key, const MapTileDefinition* value);
-MapItem* MapHashTableSearch(MapHashTable* map, const int key);
-void MapHashTableDelete(MapHashTable* map, const int key);
 
 #endif
