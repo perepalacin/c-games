@@ -51,14 +51,20 @@ typedef struct {
     MapItem** items;
 } MapHashTable;
 
+
+//TODO: Refactor this mess and remove functions that are not required!
 void LoadTileAssets(void);
 void InitMap(void);
 void RenderMap(void);
 void FreeMap(void);
 void UnloadTileAssets(void);
 
+unsigned int GenerateHashKey(int x_coord, int y_coord);
+static MapHashTable* InitializeMapHashTable(void);
 void MapHashTableInsert(MapHashTable* map, const int key, const MapTileDefinition* value);
 MapItem* MapHashTableSearch(MapHashTable* map, const int key);
 void MapHashTableDelete(MapHashTable* map, const int key);
-
+typedef void (*MapItemCallback)(int key, const MapTileDefinition* value);
+void MapHashTableIterate(MapHashTable* map, MapItemCallback callback);
+void RenderTilesFromHashTable(MapHashTable* map);
 #endif

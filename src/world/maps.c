@@ -3,6 +3,7 @@
 Texture2D tileset_atlas;
 MapTileDefinition tile_definitions[NUM_TILE_TYPES];
 
+MapHashTable* myTileHashTable;
 MapCell **game_map; 
 const int MAP_WIDTH = 30;       
 const int MAP_HEIGHT = 30;     
@@ -48,6 +49,14 @@ void LoadTileAssets(void) {
 
 void InitMap (void) {
     game_map = (MapCell **)malloc(MAP_HEIGHT * sizeof(MapCell *));
+
+    myTileHashTable = InitializeMapHashTable();
+    if (myTileHashTable != NULL) {
+        MapHashTableInsert(myTileHashTable, GenerateHashKey(0, 0), &tile_definitions[GREEN_TREE_1]);
+        MapHashTableInsert(myTileHashTable, GenerateHashKey(0, 1), &tile_definitions[GREEN_TREE_2]);
+        MapHashTableInsert(myTileHashTable, GenerateHashKey(0, 2), &tile_definitions[GREEN_TREE_3]);
+        MapHashTableInsert(myTileHashTable, GenerateHashKey(0, 3), &tile_definitions[GREEN_TREE_4]);
+    }
     
     if (game_map == NULL) {
         fprintf(stderr, "Error: Failed to allocate memory for map rows.\n");
@@ -95,15 +104,16 @@ void RenderMap(void) {
         }
     }
 
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        for (int x = 0; x < MAP_WIDTH; x++) {
-            int tileId = game_map[y][x].overhead_layer.tile_id;
-            if (tileId >= 0 && tileId < NUM_TILE_TYPES) {
-                MapTileDefinition def = tile_definitions[tileId];
-                DrawTextureRec(tileset_atlas, def.sprite_rectangle, (Vector2){x*def.tile_width, y*def.tile_height}, WHITE);
-            }
-        }
-    }
+    // for (int y = 0; y < MAP_HEIGHT; y++) {
+    //     for (int x = 0; x < MAP_WIDTH; x++) {
+    //         int tileId = game_map[y][x].overhead_layer.tile_id;
+    //         if (tileId >= 0 && tileId < NUM_TILE_TYPES) {
+    //             MapTileDefinition def = tile_definitions[tileId];
+    //             DrawTextureRec(tileset_atlas, def.sprite_rectangle, (Vector2){x*def.tile_width, y*def.tile_height}, WHITE);
+    //         }
+    //     }
+    // }
+    RenderTilesFromHashTable(myTileHashTable);
 }
 
 
@@ -145,12 +155,12 @@ unsigned int GenerateHashKey(int x_coord, int y_coord) {
 }
 
 static MapItem* AddMapItem(const int k, const MapTileDefinition* map_tile_def) {
-    MapItem* i = malloc(sizeof(MapTileDefinition));
+    MapItem* i = malloc(sizeof(MapItem)); 
     if (i == NULL) {
         TraceLog(LOG_ERROR, "AddMapItem: Failed to allocate memory for MapItem.");
         return NULL; 
     }
-    i->key = k;
+    i->key =k;
     i->value = malloc(sizeof(MapTileDefinition));
     if (i->value == NULL) {
         TraceLog(LOG_ERROR, "AddMapItem: Failed to allocate memory for MapTileDefinition value.");
@@ -159,7 +169,6 @@ static MapItem* AddMapItem(const int k, const MapTileDefinition* map_tile_def) {
     }
 
     memcpy(i->value, map_tile_def, sizeof(MapTileDefinition));
-
     return i; 
 }
 
@@ -182,20 +191,19 @@ void DeleteMapHashTable(MapHashTable* map_hash_table) {
 
 void MapHashTableInsert(MapHashTable* map, const int key, const MapTileDefinition* value) {
     MapItem* item = AddMapItem(key, value);
-    map->items[GenerateHashKey(1, 1)] = item;
+    map->items[key] = item;
     map->count++;
 }
 
-MapItem* MapHashTableSearch(MapHashTable* map, const int coords) {
-    MapItem* map_item = map->items[GenerateHashKey(1, 1)];
+MapItem* MapHashTableSearch(MapHashTable* map, const int key) {
+    MapItem* map_item = map->items[key];
     if (map_item) {
         return map_item;
     }
     return NULL;
 }
 
-void MapHashTableDelete(MapHashTable* map, const int coords) {
-    int key = GenerateHashKey(1,1);
+void MapHashTableDelete(MapHashTable* map, const int key) {
     MapItem* map_item = map->items[key];
     if (map_item != NULL) {
         if (map_item != &HT_DELETED_ITEM) {
@@ -204,4 +212,37 @@ void MapHashTableDelete(MapHashTable* map, const int coords) {
             map->count--;
         }
     }
+}
+
+void MapHashTableIterate(MapHashTable* map, MapItemCallback callback) {
+    if (map == NULL || callback == NULL) {
+        TraceLog(LOG_WARNING, "MapHashTableIterate: Map or callback is NULL. Cannot iterate.");
+        return;
+    }
+
+    for (int i = 0; i < map->size; i++) {
+        printf("rendering tile with index: %d\n", i);
+        MapItem* item = map->items[i];
+        printf("Checking to render: %d, %d \n", (item != NULL), (item != &HT_DELETED_ITEM));
+        if (item != NULL && item != &HT_DELETED_ITEM) {
+            printf("rendering tile on coordinates: %d, %d\n", item->value->tile_height, item->value->tile_width);
+            callback(item->key, item->value);
+        }
+    }
+}
+
+static void RenderSingleTileFromHashTable(int key, const MapTileDefinition* value) {
+    int x = key / 1000;
+    int y = key % 1000;
+    printf("coordinates - x: %d, y: %d. With sprite: %d", x, y, value->sprite_rectangle);
+    DrawTextureRec(tileset_atlas, value->sprite_rectangle, (Vector2){(float)x * value->tile_width, (float)y * value->tile_height}, WHITE);
+}
+
+void RenderTilesFromHashTable(MapHashTable* map) {
+    printf("Rendering map from hashtable!\n");
+    if (map == NULL) {
+        TraceLog(LOG_WARNING, "RenderTilesFromHashTable: Map is NULL. Cannot render.");
+        return;
+    }
+    MapHashTableIterate(map, RenderSingleTileFromHashTable);
 }

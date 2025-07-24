@@ -263,7 +263,7 @@ void UpdatePlayerPosition(void) {
         return;
     }
 
-    if (pixels_moved == 32) {
+    if (pixels_moved == 16) {
         is_player_moving = 0;
         pixels_moved = 0;
     }
