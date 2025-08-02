@@ -8,6 +8,12 @@
         "animation.h": "c",
         "stdlib.h": "c",
         "camera.h": "c",
-        "maps.h": "c"
+        "maps.h": "c",
+        "particle.h": "c",
+        "cstdlib": "c",
+        "locale": "c",
+        "new": "c",
+        "ostream": "c",
+        "vectors.h": "c"
     }
 }
