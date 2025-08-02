@@ -3,7 +3,7 @@
  
 Particle *particles;
 
-const int PARTICLES_COUNT = 25;
+const int PARTICLES_COUNT = 350;
 
 extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
@@ -20,9 +20,11 @@ Particle *InitParticles(void) {
         particles[i].id = i;
         particles[i].centerPos = (Vector2){ (float)GetRandomValue(0, SCREEN_WIDTH), (float)GetRandomValue(0, SCREEN_HEIGHT) }; 
         particles[i].speed = (Vector2){ (float)GetRandomValue(-4, 4), (float)GetRandomValue(-4, 4) }; 
-        particles[i].radius = (float)GetRandomValue(10, 30);
-        particles[i].color = (Color){ (unsigned char)GetRandomValue(0, 255), (unsigned char)GetRandomValue(0, 255), (unsigned char)GetRandomValue(0, 255), 255 }; 
-        particles[i].thickness = (float)GetRandomValue(0, 4) > 2 ? (float)GetRandomValue(2, 4) : 0; 
+        particles[i].radius = (float)GetRandomValue(1, 4);
+        particles[i].color = WHITE;
+        // particles[i].color = (Color){ (unsigned char)GetRandomValue(0, 255), (unsigned char)GetRandomValue(0, 255), (unsigned char)GetRandomValue(0, 255), 255 }; 
+        particles[i].thickness = 0;
+        // particles[i].thickness = (float)GetRandomValue(0, 4) > 2 ? (float)GetRandomValue(2, 4) : 0; 
         particles[i].weight = 1.0f;   
     }
 
@@ -43,7 +45,7 @@ void DetectCollissions (Particle *particle, Particle *particles) {
         }
 
         if (GetDistance(particles[i].centerPos, particle->centerPos) <= (particles[i].radius + particle->radius)) {
-            printf("collission detected\n");
+            UpdateParticlesAfterCollision(particle, &particles[i]);
         }
     }
 }

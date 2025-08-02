@@ -7,7 +7,7 @@ const int SCREEN_WIDTH = 900;
 const int SCREEN_HEIGHT = 720;
 const Vector2 screenSize = {SCREEN_WIDTH, SCREEN_HEIGHT};
 const int TARGET_FPS = 120;
-const Color BACKGROUND_COLOR = DARKGRAY;
+const Color BACKGROUND_COLOR = BLACK;
 
 Camera2D camera = { 0 };
 
