@@ -22,9 +22,7 @@ Particle *InitParticles(void) {
         particles[i].speed = (Vector2){ (float)GetRandomValue(-4, 4), (float)GetRandomValue(-4, 4) }; 
         particles[i].radius = (float)GetRandomValue(1, 4);
         particles[i].color = WHITE;
-        // particles[i].color = (Color){ (unsigned char)GetRandomValue(0, 255), (unsigned char)GetRandomValue(0, 255), (unsigned char)GetRandomValue(0, 255), 255 }; 
         particles[i].thickness = 0;
-        // particles[i].thickness = (float)GetRandomValue(0, 4) > 2 ? (float)GetRandomValue(2, 4) : 0; 
         particles[i].weight = 1.0f;   
     }
 
