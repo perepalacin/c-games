@@ -16,8 +16,7 @@ int main(void)
 	srand(time(0));
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "C Game Test");
     InitFreeCamera();
-    LoadTileAssets();
-    InitMap();
+    LoadMap();
     SetTargetFPS(TARGET_FPS);
     LoadPlayerTextures();
 
@@ -32,8 +31,7 @@ int main(void)
         EndDrawing();
     }
 
-    FreeMap();
-    UnloadTileAssets();
+    UnloadMap();
     CloseWindow();
 
     return 0;

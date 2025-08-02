@@ -38,10 +38,7 @@ typedef struct {
     // could add the weather layer for clouds, rain and such
 } MapCell;
 
-void LoadTileAssets(void);
-void InitMap(void);
+void LoadMap(void);
 void RenderMap(void);
-void FreeMap(void);
-void UnloadTileAssets(void);
-
+void UnloadMap(void);
 #endif

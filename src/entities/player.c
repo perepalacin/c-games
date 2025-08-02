@@ -5,7 +5,7 @@
 Texture2D atlas;
 SpriteAnimation current_player_animation;
 PlayerPos player_position;
-Vector2 player_grid_position;
+PlayerPos player_grid_position;
 bool is_player_moving = 0;
 int pixels_moved = 0;
 const int PLAYER_HEIGHT = 26;
@@ -166,7 +166,7 @@ void loadSprites (void) {
 	}
 
     player_position = (PlayerPos){0, 0};
-    player_grid_position = (Vector2){0, 0};
+    player_grid_position = (PlayerPos){0, 0};
 
 }
 
@@ -186,11 +186,11 @@ int GetPlayerDirection () {
 	return player_direction;
 }
 
-Vector2 GetPlayerGridPosition () {
+PlayerPos GetPlayerGridPosition () {
     return player_grid_position;
 }
 
-void SetPlayerGridPosition (Vector2 new_pos) {
+void SetPlayerGridPosition (PlayerPos new_pos) {
     player_grid_position.x = new_pos.x;
     player_grid_position.y = new_pos.y;
 }
@@ -217,30 +217,30 @@ void SetPlayerDirection (const int new_direction) {
 
 void UpdatePlayerDirection (void) {
     is_player_moving = 1;
-    Vector2 current_player_grid_position = GetPlayerGridPosition();
+    PlayerPos current_player_grid_position = GetPlayerGridPosition();
     if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_W)) {
         SetPlayerDirection(MALE_PLAYER_RUN_UP);
-        player_grid_position.x = --current_player_grid_position.x;
+        player_grid_position.y = --current_player_grid_position.y;
     } else if (IsKeyDown(KEY_W)) {
         SetPlayerDirection(MALE_PLAYER_WALK_UP);
-        player_grid_position.x = --current_player_grid_position.x;
+        player_grid_position.y = --current_player_grid_position.y;
     } else if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_D)) {
         SetPlayerDirection(MALE_PLAYER_RUN_RIGHT);
-        player_grid_position.y = ++current_player_grid_position.y;
+        player_grid_position.x = ++current_player_grid_position.x;
     } else if (IsKeyDown(KEY_D)) {
         SetPlayerDirection(MALE_PLAYER_WALK_RIGHT);
-        player_grid_position.y = ++current_player_grid_position.y;
-    } else if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_S)) {
         player_grid_position.x = ++current_player_grid_position.x;
+    } else if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_S)) {
+        player_grid_position.y = ++current_player_grid_position.y;
         SetPlayerDirection(MALE_PLAYER_RUN_DOWN);
     } else if (IsKeyDown(KEY_S)) {
-        player_grid_position.x = ++current_player_grid_position.x;
+        player_grid_position.y = ++current_player_grid_position.y;
         SetPlayerDirection(MALE_PLAYER_WALK_DOWN);
     } else if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_A)) {
-        player_grid_position.y = --current_player_grid_position.y;
+        player_grid_position.x = --current_player_grid_position.x;
         SetPlayerDirection(MALE_PLAYER_RUN_LEFT);
     } else if (IsKeyDown(KEY_A)) {
-        player_grid_position.y = --current_player_grid_position.y;
+        player_grid_position.x = --current_player_grid_position.x;
         SetPlayerDirection(MALE_PLAYER_WALK_LEFT);
     } else {
         is_player_moving = 0;
@@ -272,16 +272,13 @@ void UpdatePlayerPosition(void) {
         return;
     }
 
-    if (player_position.x == player_grid_position.x * 32 && player_position.y == player_grid_position.y * 32) {
+    if (player_position.x == player_grid_position.x * 16 && player_position.y == player_grid_position.y * 16) {
         is_player_moving = 0;
     }
     
 }
 
 void UpdatePlayerState(void) {
-    printf("Is player moving: %d\n", is_player_moving); 
-    printf("Player grid: %d, %d\n", player_grid_position.x, player_grid_position.y);
-    printf("Player pos: %d, %d\n", player_position.x, player_position.y);
     if (is_player_moving) {
         UpdatePlayerPosition();
     } else {

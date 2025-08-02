@@ -45,7 +45,7 @@ void LoadPlayerTextures(void);
 void DrawPlayer(void);
 void UpdatePlayerState(void);
 Vector2 GetPlayerPosition();
-Vector2 GetPlayerGridPosition();
-void SetPlayerGridPosition(Vector2);
+PlayerPos GetPlayerGridPosition();
+void SetPlayerGridPosition(PlayerPos);
 
 #endif
