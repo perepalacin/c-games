@@ -5,6 +5,9 @@ extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
 extern Color BACKGROUND_COLOR;
 
+const int MAX_X_SPEED = 4;
+const int MAX_Y_SPEED = 4;
+
 Particle InitParticle (Vector2 centerPos, Vector2 speed, float radius, Color color, float thickness) {
     return (Particle){
         .centerPos = centerPos,
@@ -13,6 +16,24 @@ Particle InitParticle (Vector2 centerPos, Vector2 speed, float radius, Color col
         .color = color,
         .thickness = thickness
     };
+}
+
+void SetParticleColorBasedOnSpeed(Particle *particle) {
+    const float speed_modulus = GetModulus(particle->speed);
+    const float max_speed = GetModulus((Vector2){MAX_X_SPEED, MAX_Y_SPEED});
+    particle->color = (Color){ (int)(speed_modulus/(max_speed)*255) , 0, 255 - ((int)(speed_modulus/(max_speed)*255)), 255 };
+}
+
+Particle InitRandomParticle (int id) {
+    Particle newParticle;
+    newParticle.id = id;
+    newParticle.centerPos = (Vector2){ (float)GetRandomValue(0, SCREEN_WIDTH), (float)GetRandomValue(0, SCREEN_HEIGHT) }; 
+    newParticle.speed = (Vector2){ (float)GetRandomValue(-MAX_X_SPEED, MAX_X_SPEED), (float)GetRandomValue(-MAX_Y_SPEED, MAX_Y_SPEED) }; 
+    newParticle.radius = (float)GetRandomValue(1, 4);
+    newParticle.thickness = 0;
+    newParticle.weight = (float)GetRandomValue(0, 8);  
+    SetParticleColorBasedOnSpeed(&newParticle);
+    return newParticle;
 }
 
 void UpdateParticle(Particle *particle) {
@@ -61,11 +82,12 @@ void UpdateParticlesAfterCollision(Particle *p1, Particle *p2) {
 
     p2->speed.x = v2fn * cosf(phi) - v2ft * sinf(phi);
     p2->speed.y = v2fn * sinf(phi) + v2ft * cosf(phi);
+    SetParticleColorBasedOnSpeed(p1);
+    SetParticleColorBasedOnSpeed(p2);
 }
 
 
 void RenderParticle (Particle particle) {
-    printf("Rendering particle with coordinates -> x: %f, y: %f and id: %d\n", particle.centerPos.x, particle.centerPos.x, particle.id);
     DrawCircleV(particle.centerPos, particle.radius, particle.color);                              
     if (particle.thickness != 0.0f) {
         DrawCircleV(particle.centerPos, particle.radius - particle.thickness, BACKGROUND_COLOR);                              

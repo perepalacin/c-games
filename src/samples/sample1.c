@@ -3,7 +3,7 @@
  
 Particle *particles;
 
-const int PARTICLES_COUNT = 350;
+const int PARTICLES_COUNT = 50;
 
 extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
@@ -17,13 +17,7 @@ Particle *InitParticles(void) {
     }
 
     for (int i = 0;  i < PARTICLES_COUNT; i++) {
-        particles[i].id = i;
-        particles[i].centerPos = (Vector2){ (float)GetRandomValue(0, SCREEN_WIDTH), (float)GetRandomValue(0, SCREEN_HEIGHT) }; 
-        particles[i].speed = (Vector2){ (float)GetRandomValue(-4, 4), (float)GetRandomValue(-4, 4) }; 
-        particles[i].radius = (float)GetRandomValue(1, 4);
-        particles[i].color = WHITE;
-        particles[i].thickness = 0;
-        particles[i].weight = 1.0f;   
+        particles[i] = InitRandomParticle(i); 
     }
 
     return particles;

@@ -16,6 +16,7 @@ typedef struct {
 } Particle;
 
 Particle InitParticle(Vector2 centerPos, Vector2 speed, float radius, Color color, float thickness);
+Particle InitRandomParticle (int id);
 void RenderParticle(Particle);
 void UpdateParticle(Particle *);
 void UpdateParticlesAfterCollision(Particle *p1, Particle *p2);
