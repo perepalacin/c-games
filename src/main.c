@@ -3,8 +3,8 @@
 #include "./samples/samples.h"
 
 
-const int SCREEN_WIDTH = 900;
-const int SCREEN_HEIGHT = 720;
+const int SCREEN_WIDTH = 1440;
+const int SCREEN_HEIGHT = 800;
 const Vector2 screenSize = {SCREEN_WIDTH, SCREEN_HEIGHT};
 const int TARGET_FPS = 120;
 const Color BACKGROUND_COLOR = BLACK;
@@ -17,7 +17,7 @@ void InitFreeCamera () {
     camera.offset = (Vector2){0,0};
     camera.target = (Vector2){ 0, 0 };
     camera.rotation = 0.0f;
-    camera.zoom = 1;
+    camera.zoom = 0.5f;
 }
 
 int main(void)
