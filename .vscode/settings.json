@@ -15,6 +15,9 @@
         "new": "c",
         "ostream": "c",
         "vectors.h": "c",
-        "__locale": "c"
+        "__locale": "c",
+        "container.h": "c",
+        "stdio.h": "c",
+        "time.h": "c"
     }
 }

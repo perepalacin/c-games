@@ -1,9 +1,12 @@
 #include "particle.h"
 #include "../utils/vectors.h"
 #include <math.h>
+#include "../controls/container.h"
 
-extern const int SCREEN_WIDTH;
-extern const int SCREEN_HEIGHT;
+extern const int CONTAINER_WIDTH;
+extern const int CONTAINER_HEIGHT;
+extern const int CONTAINER_X_PADDING;
+extern const int CONTAINER_Y_PADDING;
 extern const int TARGET_FPS;
 extern Color BACKGROUND_COLOR;
 
@@ -73,17 +76,17 @@ Particle InitRandomParticle (int id) {
     Particle newParticle;
     newParticle.id = id;
     newParticle.radius = (float)GetRandomValue(1, 20);
-    Vector2 center_pos = (Vector2){ (float)GetRandomValue(0, SCREEN_WIDTH), (float)GetRandomValue(0, SCREEN_HEIGHT) }; 
+    Vector2 center_pos = (Vector2){ (float)GetRandomValue(0, CONTAINER_WIDTH), (float)GetRandomValue(0, CONTAINER_HEIGHT) }; 
     
     if (center_pos.x - newParticle.radius <= 0) {
         center_pos.x = center_pos.x + newParticle.radius;
-    } else if (center_pos.x + newParticle.radius >= SCREEN_WIDTH) {
+    } else if (center_pos.x + newParticle.radius >= CONTAINER_WIDTH) {
         center_pos.x = center_pos.x - newParticle.radius;
     }
     
     if (center_pos.y - newParticle.radius <= 0) {
         center_pos.y = center_pos.y + newParticle.radius;
-    } else if (center_pos.y + newParticle.radius >= SCREEN_HEIGHT) {
+    } else if (center_pos.y + newParticle.radius >= CONTAINER_HEIGHT) {
         center_pos.y = center_pos.y - newParticle.radius;
     }
 
@@ -99,8 +102,6 @@ Particle InitRandomParticle (int id) {
 void AddParticleGravity(Particle *particle) {
     float deltaTime = GetFrameTime();
 
-    bool is_gravity_active = 0;
-
     float gravity_constant = 1000.0f;
     float gravity_magnitude = (gravity_constant * particle->weight);
         
@@ -108,12 +109,16 @@ void AddParticleGravity(Particle *particle) {
 
     if (IsKeyDown(KEY_UP)) {
         gravity_direction = (Vector2){0.0f, -1.0f};
+        HighlightActiveGravity(TOP);
     } else if (IsKeyDown(KEY_LEFT)) {
         gravity_direction = (Vector2){-1.0f, 0.0f};
+        HighlightActiveGravity(LEFT);
     } else if (IsKeyDown(KEY_RIGHT)) {
         gravity_direction = (Vector2){1.0f, 0.0f};
+        HighlightActiveGravity(RIGHT);
     } else if (IsKeyDown(KEY_DOWN)) {
         gravity_direction = (Vector2){0.0f, 1.0f};
+        HighlightActiveGravity(BOTTOM);
     } else {
         gravity_direction = (Vector2){0.0f, 0.0f};
     }
@@ -135,9 +140,9 @@ void AddMouseInteractivity(Particle *particle) {
     if (!IsMouseButtonDown(MOUSE_BUTTON_LEFT)) return;
 
     if (mouse_position.x > 0 
-    && mouse_position.x < SCREEN_WIDTH
+    && mouse_position.x < CONTAINER_WIDTH
     && mouse_position.y > 0 &&
-    mouse_position.y < SCREEN_HEIGHT ) {
+    mouse_position.y < CONTAINER_HEIGHT ) {
         float deltaTime = GetFrameTime();
 
         Vector2 delta = {particle->centerPos.x - mouse_position.x, particle->centerPos.y - mouse_position.y};
@@ -164,13 +169,13 @@ void AddMouseInteractivity(Particle *particle) {
 
 void CheckBoundaryCollisions (Particle *particle) {
     float deltaTime = GetFrameTime();
-    if (((particle->centerPos.x + particle->speed.x * deltaTime + particle->radius) >= SCREEN_WIDTH) || 
-    ((particle->centerPos.x + particle->speed.x * deltaTime - particle->radius) <= 0)) {
+    if (((particle->centerPos.x + particle->speed.x * deltaTime + particle->radius) >= (CONTAINER_WIDTH + CONTAINER_X_PADDING)) || 
+    ((particle->centerPos.x + particle->speed.x * deltaTime - particle->radius) <= CONTAINER_X_PADDING)) {
         particle->speed.x *= -1;
     }
 
-    if (((particle->centerPos.y + particle->speed.y * deltaTime + particle->radius) >= SCREEN_HEIGHT) || 
-    ((particle->centerPos.y + particle->speed.y * deltaTime - particle->radius) <= 0)) {
+    if (((particle->centerPos.y + particle->speed.y * deltaTime + particle->radius) >= (CONTAINER_HEIGHT + CONTAINER_Y_PADDING)) || 
+    ((particle->centerPos.y + particle->speed.y * deltaTime - particle->radius) <= CONTAINER_Y_PADDING)) {
         particle->speed.y *= -1;
     }
 }

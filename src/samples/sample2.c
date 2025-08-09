@@ -3,11 +3,11 @@
  
 Particle *particles;
 
-extern const int SCREEN_WIDTH;
-extern const int SCREEN_HEIGHT;
+extern const int CONTAINER_WIDTH;
+extern const int CONTAINER_HEIGHT;
 
-const int ROWS_OF_PARTICLES = 1;
-const int COLS_OF_PARTICLES = 1;
+const int ROWS_OF_PARTICLES = 20;
+const int COLS_OF_PARTICLES = 30;
 
 Particle *InitParticles(void) {
     Particle *particles = (Particle *)malloc(ROWS_OF_PARTICLES * COLS_OF_PARTICLES * sizeof(Particle));
@@ -23,10 +23,10 @@ Particle *InitParticles(void) {
         for (int j = 0; j < ROWS_OF_PARTICLES; j++) {
             particles[temp_id] = InitParticle(
                 temp_id,
-                (Vector2){(SCREEN_WIDTH / (COLS_OF_PARTICLES + 1)) * (i + 1), (SCREEN_WIDTH / (ROWS_OF_PARTICLES + 1)) * (j + 1)},
+                (Vector2){(float)(CONTAINER_WIDTH / (COLS_OF_PARTICLES + 1)) * (i + 1), (CONTAINER_HEIGHT / (float)(ROWS_OF_PARTICLES + 1)) * (j + 1)},
                 (Vector2){0.0f, 0.0f},
                 (Vector2){0.0f, 0.0f},
-                10.0f,
+                5.0f,
                 0.0f,
                 (float)GetRandomValue(1, 100));
             temp_id++;

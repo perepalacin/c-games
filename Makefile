@@ -1,8 +1,8 @@
 # Define the C compiler (Clang is the default on macOS)
 CC = clang
 
-# Source files (all .c files in the src/ directory)
-SRCS = $(wildcard src/*.c src/*/*.c)
+# Source files (all .c files in the src/ directory and the raygui subdirectory)
+SRCS = $(wildcard src/*.c src/*/*.c src/raygui/*.c)
 
 # Object files directory
 OBJ_DIR = build/obj
