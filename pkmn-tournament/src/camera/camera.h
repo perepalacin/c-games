@@ -2,7 +2,8 @@
 #include "raylib.h"
 
 #define SCREEN_WIDTH 256
-#define SCREEN_HEIGHT 302
+#define SCREEN_HEIGHT 400
+#define SCALING_FACTOR 2
 
 #define CONTAINER_X_PADDING 20
 #define CONTAINER_Y_PADDING 20
