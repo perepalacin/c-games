@@ -1,0 +1,55 @@
+#ifndef TRAINER_H
+#include "../pkmn/pkmn.h"
+#include "raylib.h"
+
+typedef enum {
+    TRAINER_YOUNGSTER,
+    TRAINER_LASS,
+    TRAINER_SCHOOL_KID,
+    TRAINER_CAMPER,
+    TRAINER_PICNICKER,
+    TRAINER_BUG_CATCHER,
+    TRAINER_POKEMON_FAN,
+    TRAINER_FISHERMAN,
+    TRAINER_POKEMON_BREEDER,
+    TRAINER_POKEMON_RANGER,
+    TRAINER_SCIENTIST,
+    TRAINER_NINJA_BOY,
+    TRAINER_RUIN_MANIAC,
+    TRAINER_COLLECTOR,
+    TRAINER_GUITARIST,
+    TRAINER_BLACK_BELT,
+    TRAINER_BATTLE_GIRL,
+    TRAINER_PSYCHIC,
+    TRAINER_GENTLEMAN,
+    TRAINER_SOCIALITE,
+    TRAINER_RICH_BOY,
+    TRAINER_BEAUTY,
+    TRAINER_AROMA_LADY,
+    TRAINER_WAITRESS,
+    TRAINER_CYCLIST,
+    TRAINER_HIKER,
+    TRAINER_SWIMMER_M,
+    TRAINER_SWIMMER_F,
+    TRAINER_TUBE_M,
+    TRAINER_TUBE_F,
+    TRAINER_ACE_TRAINER,
+    TRAINER_VETERAN,
+    TRAINER_TEAM_GALACTIC_GRUNT,
+    TRAINER_COUNT
+} TrainerType;
+
+typedef struct {
+    Rectangle frontSprite;
+    Rectangle overViewSprite;
+} TrainerSprites;
+
+typedef struct {
+    char *name;
+    TrainerType type;
+    Gender gender;
+    Pokemon *pokemons;
+
+} Trainer;
+
+#endif

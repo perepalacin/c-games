@@ -210,14 +210,17 @@ static void updateFightMenuPosition(void) {
     }
 }
 
-void renderMainCombatMenu(void) {
-    if (!isTextureLoaded) {
+void renderMainCombatMenu(Pokemon *pokemon) {
+    if (!isTextureLoaded || pokemon == NULL) {
         exit(132);
     }
     Vector2 menuTargetPosition = {0.0f, 197};
     if (menuState == MENU_MAIN_STATE) {
         Rectangle menuRect = {17, 35, SCREEN_WIDTH, 203};
         DrawTextureRec(menuTextures, menuRect, menuTargetPosition, WHITE);
+        DrawTextureRec(menuTextures,
+                       mainMenuSelectorSprites[mainMenuPosition.currentPos].selectorRect,
+                       mainMenuSelectorSprites[mainMenuPosition.currentPos].selectorTarget, WHITE);
         DrawTextureRec(menuTextures,
                        mainMenuSelectorSprites[mainMenuPosition.currentPos].selectorRect,
                        mainMenuSelectorSprites[mainMenuPosition.currentPos].selectorTarget, WHITE);

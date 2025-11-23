@@ -1,4 +1,5 @@
 #include "./camera/camera.h"
+#include "./combat/combat.h"
 #include "./map/map.h"
 #include "./menus/menus.h"
 #include "dialog/dialog.h"
@@ -17,13 +18,14 @@ int main(void) {
     initFreeCamera(&camera);
     initMapSprites();
     loadMenuSprites();
+    loadCombatTextures();
     loadDialogSprites();
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BACKGROUND_COLOR);
         BeginMode2D(camera);
         renderMap(FIELD_NIGHT);
-        renderMainCombatMenu();
+        renderCombat();
         renderDialogBubble();
         EndMode2D();
         EndDrawing();
@@ -31,5 +33,6 @@ int main(void) {
     unloadDialogSprites();
     unloadMapSprites();
     unloadMenuSprites();
+    unloadCombatTextures();
     return 0;
 }

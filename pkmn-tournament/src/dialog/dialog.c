@@ -16,9 +16,10 @@ void renderDialogBubble(void) {
     if (!isTextureLoaded) {
         exit(132);
     }
-    Rectangle menuRect = {0, 0, 252, 44};
-    Vector2 menuTargetPosition = {2, 152};
-    DrawTextureRec(dialogBubbleTexture, menuRect, menuTargetPosition, WHITE);
+    Rectangle dialogRect = {0, 0, 252, 44};
+    Vector2 dialogTargetPosition = {2, 152};
+    DrawRectangle(0, 151, 256, 46, BLACK);
+    DrawTextureRec(dialogBubbleTexture, dialogRect, dialogTargetPosition, WHITE);
 }
 
 void unloadDialogSprites(void) {
