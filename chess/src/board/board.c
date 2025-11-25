@@ -11,6 +11,9 @@ bool isSpriteInitialized = false;
 extern uint8_t selectedPiece;
 extern PieceColor playerColor;
 
+static const uint8_t boardSpriteXPadding = 16;
+static const uint8_t boardSpriteYPadding = 8;
+
 const Rectangle sprites[PIECE_TYPE_COUNT][2] = {
     {
         {96, 224, SQUARE_SIZE, SQUARE_SIZE}, // WHITE PAWN
@@ -92,12 +95,16 @@ static uint8_t transformColsToPx(BOARD_COLS col) {
 }
 
 static uint8_t transformRowToPx(BOARD_ROWS row) {
+
     return 144 - (8 + (row + 1) * 16);
 }
 
 BOARD_COLS transformPxToCols(float px) {
-    printf("PX for cols %f\n", px);
-    int col_index = (px - 16) / 16;
+    if (px < boardSpriteXPadding * SCALING_FACTOR ||
+        px > SCREEN_WIDTH - (boardSpriteXPadding * SCALING_FACTOR)) {
+        return COL_COUNT;
+    }
+    int col_index = ((px - SQUARE_SIZE * SCALING_FACTOR) / (SQUARE_SIZE * SCALING_FACTOR));
     if (col_index >= COL_A && col_index <= COL_H) {
         return (BOARD_COLS)col_index;
     }
@@ -105,7 +112,13 @@ BOARD_COLS transformPxToCols(float px) {
 }
 
 BOARD_ROWS transformPxToRows(float px) {
-    int inverted_row_index = (px - 8) / 16;
+    if (px < boardSpriteYPadding * SCALING_FACTOR ||
+        px > SCREEN_HEIGHT - (boardSpriteYPadding * SCALING_FACTOR)) {
+        return ROW_COUNT;
+    }
+
+    int inverted_row_index =
+        (px - (boardSpriteYPadding * SCALING_FACTOR)) / (SQUARE_SIZE * SCALING_FACTOR);
 
     if (inverted_row_index < ROW_1 || inverted_row_index >= ROW_COUNT) {
         return ROW_COUNT;
@@ -159,5 +172,15 @@ void renderBoard(Piece *whitePiece, Piece *blackPiece) {
         }
         whitePiece++;
         blackPiece++;
+    }
+}
+
+void getPiecePossibleMovements(Piece *piece) {
+    switch (piece->type) {
+        case (PIECE_PAWN) {
+        if (piece->color == PLAYER_WHITE) {
+
+        }
+        }
     }
 }

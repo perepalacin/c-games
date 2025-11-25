@@ -13,7 +13,7 @@ uint8_t selectedPiece = TOTAL_PIECES_PER_TEAM;
 Piece whitePieces[TOTAL_PIECES_PER_TEAM];
 Piece blackPieces[TOTAL_PIECES_PER_TEAM];
 
-PieceColor playerColor = PLAYER_BLACK;
+PieceColor playerColor = PLAYER_WHITE;
 
 void initGame(void) {
     if (playerColor == PLAYER_WHITE) {
@@ -98,7 +98,6 @@ void selectPreviousPiece(void) {
 void selectPieceByCoordinates(Vector2 coordinates) {
     const BOARD_COLS selectedCol = transformPxToCols(coordinates.x);
     const BOARD_ROWS selectedRow = transformPxToRows(coordinates.y);
-    printf("Expected col %d, expected row %d\n", selectedCol, selectedRow);
     for (int i = 0; i < TOTAL_PIECES_PER_TEAM; i++) {
         if (playerColor == PLAYER_WHITE) {
             if (whitePieces[i].isTaken) {

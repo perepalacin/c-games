@@ -2,6 +2,10 @@
 #include "raylib.h"
 #include <stdlib.h>
 
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 720
+#define SCALING_FACTOR 5
+
 #define TOTAL_PIECES_PER_TEAM 16
 #define SQUARE_SIZE 16
 
@@ -28,6 +32,11 @@ typedef enum {
 typedef struct {
     BOARD_COLS colPosition;
     BOARD_ROWS rowPosition;
+} PiecePosition;
+
+typedef struct {
+    BOARD_COLS colPosition;
+    BOARD_ROWS rowPosition;
     PieceType type;
     PieceColor color;
     bool isTaken;
@@ -38,5 +47,5 @@ void unloadSprites(void);
 void renderBoard(Piece *whitePiece, Piece *blackPiece);
 BOARD_COLS transformPxToCols(float px);
 BOARD_ROWS transformPxToRows(float px);
-
+void getPiecePossibleMovements(Piece *piece);
 #endif
