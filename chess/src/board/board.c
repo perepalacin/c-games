@@ -14,6 +14,9 @@ extern PieceColor playerColor;
 static const uint8_t boardSpriteXPadding = 16;
 static const uint8_t boardSpriteYPadding = 8;
 
+extern PiecePosition piecePossibleMovements[MAX_POSSIBLE_MOVEMENTS];
+extern uint8_t piecePossibleMovementsCount;
+
 const Rectangle sprites[PIECE_TYPE_COUNT][2] = {
     {
         {96, 224, SQUARE_SIZE, SQUARE_SIZE}, // WHITE PAWN
@@ -40,45 +43,6 @@ const Rectangle sprites[PIECE_TYPE_COUNT][2] = {
         {16, 208, SQUARE_SIZE, SQUARE_SIZE}, // BLACK KING
     },
 };
-
-const Piece playerInitialPositions[TOTAL_PIECES_PER_TEAM] = {
-    {COL_A, ROW_2, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_B, ROW_2, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_C, ROW_2, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_D, ROW_2, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_E, ROW_2, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_F, ROW_2, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_G, ROW_2, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_H, ROW_2, PIECE_PAWN, PLAYER_NONE, false},
-
-    {COL_A, ROW_1, PIECE_ROOK, PLAYER_NONE, false},
-    {COL_B, ROW_1, PIECE_KNIGHT, PLAYER_NONE, false},
-    {COL_C, ROW_1, PIECE_BISHOP, PLAYER_NONE, false},
-    {COL_D, ROW_1, PIECE_QUEEN, PLAYER_NONE, false},
-    {COL_E, ROW_1, PIECE_KING, PLAYER_NONE, false},
-    {COL_F, ROW_1, PIECE_BISHOP, PLAYER_NONE, false},
-    {COL_G, ROW_1, PIECE_KNIGHT, PLAYER_NONE, false},
-    {COL_H, ROW_1, PIECE_ROOK, PLAYER_NONE, false},
-};
-
-const Piece enemyInitialPositions[TOTAL_PIECES_PER_TEAM] = {
-    {COL_A, ROW_7, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_B, ROW_7, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_C, ROW_7, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_D, ROW_7, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_E, ROW_7, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_F, ROW_7, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_G, ROW_7, PIECE_PAWN, PLAYER_NONE, false},
-    {COL_H, ROW_7, PIECE_PAWN, PLAYER_NONE, false},
-
-    {COL_A, ROW_8, PIECE_ROOK, PLAYER_NONE, false},
-    {COL_B, ROW_8, PIECE_KNIGHT, PLAYER_NONE, false},
-    {COL_C, ROW_8, PIECE_BISHOP, PLAYER_NONE, false},
-    {COL_D, ROW_8, PIECE_QUEEN, PLAYER_NONE, false},
-    {COL_E, ROW_8, PIECE_KING, PLAYER_NONE, false},
-    {COL_F, ROW_8, PIECE_BISHOP, PLAYER_NONE, false},
-    {COL_G, ROW_8, PIECE_KNIGHT, PLAYER_NONE, false},
-    {COL_H, ROW_8, PIECE_ROOK, PLAYER_NONE, false}};
 
 void loadSprites(void) {
     isSpriteInitialized = true;
@@ -133,18 +97,23 @@ static void renderPiece(BOARD_COLS col, BOARD_ROWS row, PieceType pieceType, Pie
     DrawTextureRec(atlas, sprites[pieceType][color], targetPosition, WHITE);
 }
 
-static void renderSelectionAura(BOARD_COLS col, BOARD_ROWS row) {
-    Vector2 center = {transformColsToPx(col) + (double)SQUARE_SIZE / 2,
-                      transformRowToPx(row) + (double)SQUARE_SIZE / 2};
+static void renderAura(PiecePosition cell, float radius, Color color) {
+    Vector2 center = {transformColsToPx(cell.colPosition) + (double)SQUARE_SIZE / 2,
+                      transformRowToPx(cell.rowPosition) + (double)SQUARE_SIZE / 2};
     const uint8_t NUM_BLUR_PASSES = 10;
     for (int i = 0; i < NUM_BLUR_PASSES; i++) {
 
-        float currentRadius = 0 + (float)(i * 1.25f);
+        float currentRadius = 0 + (float)(i * radius / NUM_BLUR_PASSES);
 
         float alphaFactor = (float)(i + 1) / (float)NUM_BLUR_PASSES;
-        Color auraColor = RED;
-        auraColor.a = (unsigned char)(255 * alphaFactor * 0.25f);
-        DrawCircleV(center, currentRadius, auraColor);
+        color.a = (unsigned char)(255 * alphaFactor * 0.25f);
+        DrawCircleV(center, currentRadius, color);
+    }
+}
+
+static void renderPossibleMovements(void) {
+    for (int i = 0; i < piecePossibleMovementsCount; i++) {
+        renderAura(piecePossibleMovements[i], 5, YELLOW);
     }
 }
 
@@ -158,29 +127,25 @@ void renderBoard(Piece *whitePiece, Piece *blackPiece) {
 
         if (!whitePiece->isTaken) {
             if (i == selectedPiece && playerColor == PLAYER_WHITE) {
-                renderSelectionAura(whitePiece->colPosition, whitePiece->rowPosition);
+                renderAura((PiecePosition){whitePiece->piecePosition.colPosition,
+                                           whitePiece->piecePosition.rowPosition},
+                           10, RED);
+                renderPossibleMovements();
             }
-            renderPiece(whitePiece->colPosition, whitePiece->rowPosition, whitePiece->type,
-                        whitePiece->color);
+            renderPiece(whitePiece->piecePosition.colPosition,
+                        whitePiece->piecePosition.rowPosition, whitePiece->type, whitePiece->color);
         }
         if (!blackPiece->isTaken) {
             if (i == selectedPiece && playerColor == PLAYER_BLACK) {
-                renderSelectionAura(blackPiece->colPosition, blackPiece->rowPosition);
+                renderAura((PiecePosition){blackPiece->piecePosition.colPosition,
+                                           blackPiece->piecePosition.rowPosition},
+                           10, RED);
+                renderPossibleMovements();
             }
-            renderPiece(blackPiece->colPosition, blackPiece->rowPosition, blackPiece->type,
-                        blackPiece->color);
+            renderPiece(blackPiece->piecePosition.colPosition,
+                        blackPiece->piecePosition.rowPosition, blackPiece->type, blackPiece->color);
         }
         whitePiece++;
         blackPiece++;
-    }
-}
-
-void getPiecePossibleMovements(Piece *piece) {
-    switch (piece->type) {
-        case (PIECE_PAWN) {
-        if (piece->color == PLAYER_WHITE) {
-
-        }
-        }
     }
 }
