@@ -35,8 +35,7 @@ typedef struct {
 } PiecePosition;
 
 typedef struct {
-    BOARD_COLS colPosition;
-    BOARD_ROWS rowPosition;
+    PiecePosition piecePosition;
     PieceType type;
     PieceColor color;
     bool isTaken;
@@ -47,5 +46,4 @@ void unloadSprites(void);
 void renderBoard(Piece *whitePiece, Piece *blackPiece);
 BOARD_COLS transformPxToCols(float px);
 BOARD_ROWS transformPxToRows(float px);
-void getPiecePossibleMovements(Piece *piece);
 #endif
