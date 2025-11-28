@@ -57,8 +57,8 @@ const Piece enemyInitialPositions[TOTAL_PIECES_PER_TEAM] = {
     {{COL_G, ROW_8}, PIECE_KNIGHT, PLAYER_NONE, false},
     {{COL_H, ROW_8}, PIECE_ROOK, PLAYER_NONE, false}};
 
-static bool checkIfCellIsOccupied(PiecePosition piecePosition);
-static bool checkIfPieceCanBeTaken(PiecePosition piecePosition);
+static bool checkIfCellIsOccupied(PiecePosition *piecePosition);
+static bool checkIfPieceCanBeTaken(PiecePosition *piecePosition);
 static void getPiecePossibleMovements(Piece *piece);
 
 void initGame(void) {
@@ -179,30 +179,104 @@ void selectPieceByCoordinates(Vector2 coordinates) {
     }
 }
 
-static bool checkIfCellIsOccupied(PiecePosition piecePosition) {
-    return (board[piecePosition.colPosition][piecePosition.rowPosition] != NULL);
+static bool checkIfCellIsOccupied(PiecePosition *piecePosition) {
+    return (board[piecePosition->colPosition][piecePosition->rowPosition] != NULL);
 }
 
-static bool checkIfPieceCanBeTaken(PiecePosition piecePosition) {
-    return (board[piecePosition.colPosition][piecePosition.rowPosition] != NULL &&
-            board[piecePosition.colPosition][piecePosition.rowPosition]->color != playerColor);
+static bool checkIfPieceCanBeTaken(PiecePosition *piecePosition) {
+    return (board[piecePosition->colPosition][piecePosition->rowPosition] != NULL &&
+            board[piecePosition->colPosition][piecePosition->rowPosition]->color != playerColor);
+}
+
+static bool isValidMovement(PiecePosition *targetPosition) {
+    if ((int8_t)targetPosition->colPosition == COL_COUNT ||
+        // TODO: replace this for an outofbounds method!
+        (int8_t)targetPosition->colPosition < COL_A ||
+        (int8_t)targetPosition->rowPosition == ROW_COUNT ||
+        (int8_t)targetPosition->rowPosition < ROW_1) {
+        return false;
+    } else if (!checkIfCellIsOccupied(targetPosition) || checkIfPieceCanBeTaken(targetPosition)) {
+        return true;
+    }
+    return false;
+}
+
+static void getBishopPossibleMoves(const PiecePosition *currentPiecePosition) {
+    int8_t xDirection = 1;
+    int8_t yDirection = 1;
+    for (int direction = 0; direction < 4; direction++) {
+        if (direction == 0) {
+            xDirection = 1;
+            yDirection = 1;
+        } else if (direction == 1) {
+            yDirection = -1;
+        } else if (direction == 2) {
+            xDirection = -1;
+            yDirection = 1;
+        } else {
+            yDirection = -1;
+        }
+        for (int i = 1;; i++) {
+            PiecePosition targetPosition =
+                (PiecePosition){.colPosition = currentPiecePosition->colPosition + i * xDirection,
+                                .rowPosition = currentPiecePosition->rowPosition + i * yDirection};
+            if (isValidMovement(&targetPosition)) {
+                piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
+                piecePossibleMovementsCount++;
+                if (checkIfPieceCanBeTaken(&targetPosition)) {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+}
+
+static void getRookPossibleMoves(const PiecePosition *currentPiecePosition) {
+    int8_t xDirection = 1;
+    int8_t yDirection = 1;
+    for (int direction = 0; direction < 4; direction++) {
+        if (direction == 0) {
+            xDirection = 1;
+            yDirection = 0;
+        } else if (direction == 1) {
+            xDirection = -1;
+        } else if (direction == 2) {
+            xDirection = 0;
+            yDirection = 1;
+        } else {
+            yDirection = -1;
+        }
+        for (int i = 1;; i++) {
+            PiecePosition targetPosition =
+                (PiecePosition){.colPosition = currentPiecePosition->colPosition + i * xDirection,
+                                .rowPosition = currentPiecePosition->rowPosition + i * yDirection};
+            if (isValidMovement(&targetPosition)) {
+                piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
+                piecePossibleMovementsCount++;
+            } else {
+                break;
+            }
+        }
+    }
 }
 
 static void getPiecePossibleMovements(Piece *piece) {
+    // TODO: add the check mechanics!
     piecePossibleMovementsCount = 0;
+    int8_t movementDirection = -1;
+    const PiecePosition currentPiecePosition = {.colPosition = piece->piecePosition.colPosition,
+                                                .rowPosition = piece->piecePosition.rowPosition};
+    PiecePosition targetPosition;
     switch (piece->type) {
-        int8_t movementDirection = -1;
-    case (PIECE_PAWN):
+    case (PIECE_PAWN): {
         if (piece->color == playerColor) {
             movementDirection = 1;
-            const PiecePosition currentPiecePosition = {
-                .colPosition = piece->piecePosition.colPosition,
-                .rowPosition = piece->piecePosition.rowPosition};
-
-            PiecePosition targetPosition = {.colPosition = currentPiecePosition.colPosition,
-                                            .rowPosition = currentPiecePosition.rowPosition +
-                                                           (1 * movementDirection)};
-            if (!checkIfCellIsOccupied(targetPosition)) {
+            targetPosition = (PiecePosition){.colPosition = currentPiecePosition.colPosition,
+                                             .rowPosition = currentPiecePosition.rowPosition +
+                                                            (1 * movementDirection)};
+            if (!checkIfCellIsOccupied(&targetPosition)) {
                 piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
                 piecePossibleMovementsCount++;
                 if (currentPiecePosition.rowPosition == ROW_2 ||
@@ -210,7 +284,7 @@ static void getPiecePossibleMovements(Piece *piece) {
                     targetPosition = (PiecePosition){
                         .colPosition = piece->piecePosition.colPosition,
                         .rowPosition = currentPiecePosition.rowPosition + (2 * movementDirection)};
-                    if (!checkIfCellIsOccupied(targetPosition)) {
+                    if (!checkIfCellIsOccupied(&targetPosition)) {
                         piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
                         piecePossibleMovementsCount++;
                     }
@@ -220,7 +294,7 @@ static void getPiecePossibleMovements(Piece *piece) {
                 targetPosition = (PiecePosition){
                     .colPosition = piece->piecePosition.colPosition + 1,
                     .rowPosition = piece->piecePosition.rowPosition + (1 * movementDirection)};
-                if (checkIfPieceCanBeTaken(targetPosition)) {
+                if (checkIfPieceCanBeTaken(&targetPosition)) {
                     piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
                     piecePossibleMovementsCount++;
                 }
@@ -228,23 +302,73 @@ static void getPiecePossibleMovements(Piece *piece) {
                 targetPosition = (PiecePosition){
                     .colPosition = piece->piecePosition.colPosition - 1,
                     .rowPosition = piece->piecePosition.rowPosition + (1 * movementDirection)};
-                if (checkIfPieceCanBeTaken(targetPosition)) {
+                if (checkIfPieceCanBeTaken(&targetPosition)) {
                     piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
                     piecePossibleMovementsCount++;
                 }
             }
-        case PIECE_KNIGHT:
-            break;
-        case PIECE_BISHOP:
-            break;
-        case PIECE_ROOK:
-            break;
-        case PIECE_QUEEN:
-            break;
-        case PIECE_KING:
-            break;
-        case PIECE_TYPE_COUNT:
             break;
         }
+    case PIECE_KNIGHT: {
+        int8_t xDirection = 0;
+        int8_t yDirection = 0;
+        for (int direction = 0; direction < 4; direction++) {
+            if (direction == 0) {
+                xDirection = 1;
+                yDirection = 1;
+            } else if (direction == 1) {
+                yDirection = -1;
+            } else if (direction == 2) {
+                xDirection = -1;
+                yDirection = 1;
+            } else {
+                yDirection = -1;
+            }
+            targetPosition =
+                (PiecePosition){.colPosition = currentPiecePosition.colPosition + (1 * xDirection),
+                                .rowPosition = currentPiecePosition.rowPosition + (2 * yDirection)};
+            if (isValidMovement(&targetPosition)) {
+                piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
+                piecePossibleMovementsCount++;
+            }
+            targetPosition =
+                (PiecePosition){.colPosition = currentPiecePosition.colPosition + (2 * xDirection),
+                                .rowPosition = currentPiecePosition.rowPosition + (1 * yDirection)};
+            if (isValidMovement(&targetPosition)) {
+                piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
+                piecePossibleMovementsCount++;
+            }
+        }
+        break;
+    }
+    case PIECE_BISHOP: {
+        getBishopPossibleMoves(&currentPiecePosition);
+        break;
+    }
+    case PIECE_ROOK: {
+        getRookPossibleMoves(&currentPiecePosition);
+        break;
+    }
+    case PIECE_QUEEN:
+        getBishopPossibleMoves(&currentPiecePosition);
+        getRookPossibleMoves(&currentPiecePosition);
+        break;
+    case PIECE_KING: {
+        for (int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
+                targetPosition =
+                    (PiecePosition){.colPosition = currentPiecePosition.colPosition + i,
+                                    .rowPosition = currentPiecePosition.rowPosition + j};
+                if (isValidMovement(&targetPosition)) {
+                    piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
+                    piecePossibleMovementsCount++;
+                }
+            }
+        }
+        break;
+    }
+    case PIECE_TYPE_COUNT:
+        break;
+    }
     }
 }
