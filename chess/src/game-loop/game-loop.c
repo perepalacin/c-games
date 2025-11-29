@@ -84,6 +84,7 @@ void mainGameLoop(void) {
     renderBoard(whitePieces, blackPieces);
     handleKeyboardNavigation();
     handleMouseNavigation();
+    handlePieceMouseMovement();
 }
 
 static uint8_t getFirstNonTakenPiece(void) {
@@ -136,19 +137,38 @@ static uint8_t getPreviousAlivePiece(void) {
 void selectNextPiece(void) {
     if (selectedPiece == TOTAL_PIECES_PER_TEAM) {
         selectedPiece = getFirstNonTakenPiece();
+        if (playerColor == PLAYER_WHITE) {
+            getPiecePossibleMovements(&whitePieces[selectedPiece]);
+        } else {
+            getPiecePossibleMovements(&blackPieces[selectedPiece]);
+        }
         return;
     }
     selectedPiece = getNextAlivePiece();
+    if (playerColor == PLAYER_WHITE) {
+        getPiecePossibleMovements(&whitePieces[selectedPiece]);
+    } else {
+        getPiecePossibleMovements(&blackPieces[selectedPiece]);
+    }
 }
 
 void selectPreviousPiece(void) {
     selectedPiece = getPreviousAlivePiece();
+    if (playerColor == PLAYER_WHITE) {
+        getPiecePossibleMovements(&whitePieces[selectedPiece]);
+    } else {
+        getPiecePossibleMovements(&blackPieces[selectedPiece]);
+    }
 }
 
 void selectPieceByCoordinates(Vector2 coordinates) {
     const BOARD_COLS selectedCol = transformPxToCols(coordinates.x);
     const BOARD_ROWS selectedRow = transformPxToRows(coordinates.y);
+    bool isSelectedPieceChanged = false;
     for (int i = 0; i < TOTAL_PIECES_PER_TEAM; i++) {
+        if (i == selectedPiece) {
+            continue;
+        }
         if (playerColor == PLAYER_WHITE) {
             if (whitePieces[i].isTaken) {
                 continue;
@@ -157,6 +177,7 @@ void selectPieceByCoordinates(Vector2 coordinates) {
             if (whitePieces[i].piecePosition.colPosition == selectedCol &&
                 selectedRow == whitePieces[i].piecePosition.rowPosition) {
                 selectedPiece = i;
+                isSelectedPieceChanged = true;
             }
         }
         if (playerColor == PLAYER_BLACK) {
@@ -167,10 +188,11 @@ void selectPieceByCoordinates(Vector2 coordinates) {
             if (blackPieces[i].piecePosition.colPosition == selectedCol &&
                 selectedRow == blackPieces[i].piecePosition.rowPosition) {
                 selectedPiece = i;
+                isSelectedPieceChanged = true;
             }
         }
     }
-    if (selectedPiece != TOTAL_PIECES_PER_TEAM) {
+    if (selectedPiece != TOTAL_PIECES_PER_TEAM && isSelectedPieceChanged) {
         if (playerColor == PLAYER_WHITE) {
             getPiecePossibleMovements(&whitePieces[selectedPiece]);
         } else {
@@ -266,6 +288,7 @@ static void getPiecePossibleMovements(Piece *piece) {
     // TODO: add the check mechanics!
     piecePossibleMovementsCount = 0;
     int8_t movementDirection = -1;
+
     const PiecePosition currentPiecePosition = {.colPosition = piece->piecePosition.colPosition,
                                                 .rowPosition = piece->piecePosition.rowPosition};
     PiecePosition targetPosition;
@@ -298,7 +321,8 @@ static void getPiecePossibleMovements(Piece *piece) {
                     piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
                     piecePossibleMovementsCount++;
                 }
-            } else if (currentPiecePosition.colPosition != COL_A) {
+            }
+            if (currentPiecePosition.colPosition != COL_A) {
                 targetPosition = (PiecePosition){
                     .colPosition = piece->piecePosition.colPosition - 1,
                     .rowPosition = piece->piecePosition.rowPosition + (1 * movementDirection)};
@@ -371,4 +395,39 @@ static void getPiecePossibleMovements(Piece *piece) {
         break;
     }
     }
+}
+
+void handleReleasePiece(Vector2 mousePosition) {
+    const BOARD_COLS destinationCol = transformPxToCols(mousePosition.x);
+    const BOARD_ROWS destinationRow = transformPxToRows(mousePosition.y);
+
+    bool isValidMove = false;
+    for (int i = 0; i < piecePossibleMovementsCount; i++) {
+        if (piecePossibleMovements[i].colPosition == destinationCol &&
+            piecePossibleMovements[i].rowPosition == destinationRow) {
+            isValidMove = true;
+        }
+    }
+    if (!isValidMove) {
+        return;
+    }
+    if (checkIfPieceCanBeTaken(&(PiecePosition){destinationCol, destinationRow})) {
+        Piece *pieceToDelete = board[destinationCol][destinationRow];
+        pieceToDelete->isTaken = true;
+        board[destinationCol][destinationRow] = NULL;
+    }
+    if (playerColor == PLAYER_WHITE) {
+        const BOARD_COLS previousCol = whitePieces[selectedPiece].piecePosition.colPosition;
+        const BOARD_ROWS previousRow = whitePieces[selectedPiece].piecePosition.rowPosition;
+        whitePieces[selectedPiece].piecePosition = (PiecePosition){destinationCol, destinationRow};
+        board[previousCol][previousRow] = NULL;
+        board[destinationCol][destinationRow] = &whitePieces[selectedPiece];
+    } else {
+        const BOARD_COLS previousCol = blackPieces[selectedPiece].piecePosition.colPosition;
+        const BOARD_ROWS previousRow = blackPieces[selectedPiece].piecePosition.rowPosition;
+        blackPieces[selectedPiece].piecePosition = (PiecePosition){destinationCol, destinationRow};
+        board[previousCol][previousRow] = NULL;
+        board[destinationCol][destinationRow] = &blackPieces[selectedPiece];
+    }
+    selectedPiece = TOTAL_PIECES_PER_TEAM;
 }

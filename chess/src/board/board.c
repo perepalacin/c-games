@@ -11,6 +11,8 @@ bool isSpriteInitialized = false;
 extern uint8_t selectedPiece;
 extern PieceColor playerColor;
 
+extern bool isDraggingPiece;
+
 static const uint8_t boardSpriteXPadding = 16;
 static const uint8_t boardSpriteYPadding = 8;
 
@@ -92,6 +94,8 @@ BOARD_ROWS transformPxToRows(float px) {
     return (BOARD_ROWS)row_index;
 }
 
+int count = 0;
+
 static void renderPiece(BOARD_COLS col, BOARD_ROWS row, PieceType pieceType, PieceColor color) {
     Vector2 targetPosition = {transformColsToPx(col), transformRowToPx(row)};
     DrawTextureRec(atlas, sprites[pieceType][color], targetPosition, WHITE);
@@ -117,6 +121,33 @@ static void renderPossibleMovements(void) {
     }
 }
 
+static void highlightHoveredCell(Vector2 *mousePosition) {
+    if (!isSpriteInitialized) {
+        exit(132);
+    }
+
+    Rectangle highlightSprite = {48, 192, SQUARE_SIZE, SQUARE_SIZE};
+    const BOARD_COLS selectedCol = transformPxToCols(mousePosition->x);
+    const BOARD_ROWS selectedRow = transformPxToRows(mousePosition->y);
+    if (selectedCol < COL_A || selectedCol >= COL_COUNT || selectedRow < ROW_1 ||
+        selectedRow >= ROW_COUNT) {
+        return;
+    }
+    DrawTextureRec(atlas, highlightSprite,
+                   (Vector2){transformColsToPx(selectedCol), transformRowToPx(selectedRow)}, WHITE);
+}
+
+static void renderDraggedPiece(Piece *piece, Vector2 mousePosition) {
+    if (!isSpriteInitialized) {
+        exit(132);
+    }
+    highlightHoveredCell(&mousePosition);
+    DrawTextureRec(atlas, sprites[piece->type][piece->color],
+                   (Vector2){(mousePosition.x - (SQUARE_SIZE * 2.5f)) / SCALING_FACTOR,
+                             (mousePosition.y - (SQUARE_SIZE * 2.5f)) / SCALING_FACTOR},
+                   WHITE);
+}
+
 void renderBoard(Piece *whitePiece, Piece *blackPiece) {
     if (!isSpriteInitialized) {
         exit(132);
@@ -124,28 +155,43 @@ void renderBoard(Piece *whitePiece, Piece *blackPiece) {
     Rectangle boardRectangle = {0, 0, 160, 144};
     DrawTextureRec(atlas, boardRectangle, (Vector2){0, 0}, WHITE);
     for (int i = 0; i < TOTAL_PIECES_PER_TEAM; i++) {
-
-        if (!whitePiece->isTaken) {
-            if (i == selectedPiece && playerColor == PLAYER_WHITE) {
-                renderAura((PiecePosition){whitePiece->piecePosition.colPosition,
-                                           whitePiece->piecePosition.rowPosition},
-                           10, RED);
-                renderPossibleMovements();
-            }
+        if (whitePiece->isTaken) {
+            whitePiece++;
+            continue;
+        }
+        if (i == selectedPiece && playerColor == PLAYER_WHITE) {
+            renderAura((PiecePosition){whitePiece->piecePosition.colPosition,
+                                       whitePiece->piecePosition.rowPosition},
+                       10, RED);
+            renderPossibleMovements();
+        }
+        // TODO: move the dragged piece to the top!
+        if (isDraggingPiece && i == selectedPiece && playerColor == PLAYER_WHITE) {
+            renderDraggedPiece(whitePiece, GetMousePosition());
+        } else {
             renderPiece(whitePiece->piecePosition.colPosition,
                         whitePiece->piecePosition.rowPosition, whitePiece->type, whitePiece->color);
         }
-        if (!blackPiece->isTaken) {
-            if (i == selectedPiece && playerColor == PLAYER_BLACK) {
-                renderAura((PiecePosition){blackPiece->piecePosition.colPosition,
-                                           blackPiece->piecePosition.rowPosition},
-                           10, RED);
-                renderPossibleMovements();
-            }
+        whitePiece++;
+    }
+
+    for (int i = 0; i < TOTAL_PIECES_PER_TEAM; i++) {
+        if (blackPiece->isTaken) {
+            blackPiece++;
+            continue;
+        }
+        if (i == selectedPiece && playerColor == PLAYER_BLACK) {
+            renderAura((PiecePosition){blackPiece->piecePosition.colPosition,
+                                       blackPiece->piecePosition.rowPosition},
+                       10, RED);
+            renderPossibleMovements();
+        }
+        if (isDraggingPiece && i == selectedPiece && playerColor == PLAYER_BLACK) {
+            renderDraggedPiece(whitePiece, GetMousePosition());
+        } else {
             renderPiece(blackPiece->piecePosition.colPosition,
                         blackPiece->piecePosition.rowPosition, blackPiece->type, blackPiece->color);
         }
-        whitePiece++;
         blackPiece++;
     }
 }
