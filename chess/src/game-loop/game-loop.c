@@ -12,6 +12,7 @@ Piece whitePieces[TOTAL_PIECES_PER_TEAM];
 Piece blackPieces[TOTAL_PIECES_PER_TEAM];
 
 PieceColor playerColor = PLAYER_WHITE;
+PieceColor playerTurn = PLAYER_WHITE;
 
 Piece *board[COL_COUNT][ROW_COUNT];
 
@@ -89,7 +90,7 @@ void mainGameLoop(void) {
 
 static uint8_t getFirstNonTakenPiece(void) {
     for (int i = 0; i < TOTAL_PIECES_PER_TEAM; i++) {
-        if (playerColor == PLAYER_WHITE) {
+        if (playerTurn == PLAYER_WHITE) {
             if (!whitePieces[i].isTaken) {
                 return i;
             }
@@ -104,12 +105,12 @@ static uint8_t getFirstNonTakenPiece(void) {
 
 static uint8_t getNextAlivePiece(void) {
     for (int i = selectedPiece + 1; i < TOTAL_PIECES_PER_TEAM; i++) {
-        if (playerColor == PLAYER_WHITE) {
+        if (playerTurn == PLAYER_WHITE) {
             if (!whitePieces[i].isTaken) {
                 return i;
             }
         }
-        if (playerColor == PLAYER_BLACK) {
+        if (playerTurn == PLAYER_BLACK) {
             if (!blackPieces[i].isTaken) {
                 return i;
             }
@@ -120,12 +121,12 @@ static uint8_t getNextAlivePiece(void) {
 
 static uint8_t getPreviousAlivePiece(void) {
     for (int i = selectedPiece - 1; i >= 0; i--) {
-        if (playerColor == PLAYER_WHITE) {
+        if (playerTurn == PLAYER_WHITE) {
             if (!whitePieces[i].isTaken) {
                 return i;
             }
         }
-        if (playerColor == PLAYER_BLACK) {
+        if (playerTurn == PLAYER_BLACK) {
             if (!blackPieces[i].isTaken) {
                 return i;
             }
@@ -137,7 +138,7 @@ static uint8_t getPreviousAlivePiece(void) {
 void selectNextPiece(void) {
     if (selectedPiece == TOTAL_PIECES_PER_TEAM) {
         selectedPiece = getFirstNonTakenPiece();
-        if (playerColor == PLAYER_WHITE) {
+        if (playerTurn == PLAYER_WHITE) {
             getPiecePossibleMovements(&whitePieces[selectedPiece]);
         } else {
             getPiecePossibleMovements(&blackPieces[selectedPiece]);
@@ -145,7 +146,7 @@ void selectNextPiece(void) {
         return;
     }
     selectedPiece = getNextAlivePiece();
-    if (playerColor == PLAYER_WHITE) {
+    if (playerTurn == PLAYER_WHITE) {
         getPiecePossibleMovements(&whitePieces[selectedPiece]);
     } else {
         getPiecePossibleMovements(&blackPieces[selectedPiece]);
@@ -154,7 +155,7 @@ void selectNextPiece(void) {
 
 void selectPreviousPiece(void) {
     selectedPiece = getPreviousAlivePiece();
-    if (playerColor == PLAYER_WHITE) {
+    if (playerTurn == PLAYER_WHITE) {
         getPiecePossibleMovements(&whitePieces[selectedPiece]);
     } else {
         getPiecePossibleMovements(&blackPieces[selectedPiece]);
@@ -169,7 +170,7 @@ void selectPieceByCoordinates(Vector2 coordinates) {
         if (i == selectedPiece) {
             continue;
         }
-        if (playerColor == PLAYER_WHITE) {
+        if (playerTurn == PLAYER_WHITE) {
             if (whitePieces[i].isTaken) {
                 continue;
                 ;
@@ -180,7 +181,7 @@ void selectPieceByCoordinates(Vector2 coordinates) {
                 isSelectedPieceChanged = true;
             }
         }
-        if (playerColor == PLAYER_BLACK) {
+        if (playerTurn == PLAYER_BLACK) {
             if (blackPieces[i].isTaken) {
                 continue;
                 ;
@@ -193,7 +194,7 @@ void selectPieceByCoordinates(Vector2 coordinates) {
         }
     }
     if (selectedPiece != TOTAL_PIECES_PER_TEAM && isSelectedPieceChanged) {
-        if (playerColor == PLAYER_WHITE) {
+        if (playerTurn == PLAYER_WHITE) {
             getPiecePossibleMovements(&whitePieces[selectedPiece]);
         } else {
             getPiecePossibleMovements(&blackPieces[selectedPiece]);
@@ -207,7 +208,7 @@ static bool checkIfCellIsOccupied(PiecePosition *piecePosition) {
 
 static bool checkIfPieceCanBeTaken(PiecePosition *piecePosition) {
     return (board[piecePosition->colPosition][piecePosition->rowPosition] != NULL &&
-            board[piecePosition->colPosition][piecePosition->rowPosition]->color != playerColor);
+            board[piecePosition->colPosition][piecePosition->rowPosition]->color != playerTurn);
 }
 
 static bool isValidMovement(PiecePosition *targetPosition) {
@@ -277,11 +278,23 @@ static void getRookPossibleMoves(const PiecePosition *currentPiecePosition) {
             if (isValidMovement(&targetPosition)) {
                 piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
                 piecePossibleMovementsCount++;
+                if (checkIfPieceCanBeTaken(&targetPosition)) {
+                    break;
+                }
             } else {
                 break;
             }
         }
     }
+}
+
+static void handleEndTurn(void) {
+    if (playerTurn == PLAYER_WHITE) {
+        playerTurn = PLAYER_BLACK;
+    } else {
+        playerTurn = PLAYER_WHITE;
+    }
+    selectedPiece = TOTAL_PIECES_PER_TEAM;
 }
 
 static void getPiecePossibleMovements(Piece *piece) {
@@ -296,44 +309,48 @@ static void getPiecePossibleMovements(Piece *piece) {
     case (PIECE_PAWN): {
         if (piece->color == playerColor) {
             movementDirection = 1;
-            targetPosition = (PiecePosition){.colPosition = currentPiecePosition.colPosition,
-                                             .rowPosition = currentPiecePosition.rowPosition +
+        } else {
+            movementDirection = -1;
+        }
+        targetPosition = (PiecePosition){.colPosition = currentPiecePosition.colPosition,
+                                         .rowPosition = currentPiecePosition.rowPosition +
+                                                        (1 * movementDirection)};
+        if (!checkIfCellIsOccupied(&targetPosition)) {
+            piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
+            piecePossibleMovementsCount++;
+            if (currentPiecePosition.rowPosition == ROW_2 ||
+                currentPiecePosition.rowPosition == ROW_7) {
+                targetPosition = (PiecePosition){.colPosition = piece->piecePosition.colPosition,
+                                                 .rowPosition = currentPiecePosition.rowPosition +
+                                                                (2 * movementDirection)};
+                if (!checkIfCellIsOccupied(&targetPosition)) {
+                    piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
+                    piecePossibleMovementsCount++;
+                }
+            }
+        }
+        if (currentPiecePosition.colPosition != COL_H) {
+            targetPosition = (PiecePosition){.colPosition = piece->piecePosition.colPosition + 1,
+                                             .rowPosition = piece->piecePosition.rowPosition +
                                                             (1 * movementDirection)};
-            if (!checkIfCellIsOccupied(&targetPosition)) {
+            if (checkIfPieceCanBeTaken(&targetPosition)) {
                 piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
                 piecePossibleMovementsCount++;
-                if (currentPiecePosition.rowPosition == ROW_2 ||
-                    currentPiecePosition.rowPosition == ROW_7) {
-                    targetPosition = (PiecePosition){
-                        .colPosition = piece->piecePosition.colPosition,
-                        .rowPosition = currentPiecePosition.rowPosition + (2 * movementDirection)};
-                    if (!checkIfCellIsOccupied(&targetPosition)) {
-                        piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
-                        piecePossibleMovementsCount++;
-                    }
-                }
             }
-            if (currentPiecePosition.colPosition != COL_H) {
-                targetPosition = (PiecePosition){
-                    .colPosition = piece->piecePosition.colPosition + 1,
-                    .rowPosition = piece->piecePosition.rowPosition + (1 * movementDirection)};
-                if (checkIfPieceCanBeTaken(&targetPosition)) {
-                    piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
-                    piecePossibleMovementsCount++;
-                }
-            }
-            if (currentPiecePosition.colPosition != COL_A) {
-                targetPosition = (PiecePosition){
-                    .colPosition = piece->piecePosition.colPosition - 1,
-                    .rowPosition = piece->piecePosition.rowPosition + (1 * movementDirection)};
-                if (checkIfPieceCanBeTaken(&targetPosition)) {
-                    piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
-                    piecePossibleMovementsCount++;
-                }
-            }
-            break;
         }
+        if (currentPiecePosition.colPosition != COL_A) {
+            targetPosition = (PiecePosition){.colPosition = piece->piecePosition.colPosition - 1,
+                                             .rowPosition = piece->piecePosition.rowPosition +
+                                                            (1 * movementDirection)};
+            if (checkIfPieceCanBeTaken(&targetPosition)) {
+                piecePossibleMovements[piecePossibleMovementsCount] = targetPosition;
+                piecePossibleMovementsCount++;
+            }
+        }
+        break;
     case PIECE_KNIGHT: {
+        // Right knight for blacks crashes on click!
+        // Only when player 1 is white.
         int8_t xDirection = 0;
         int8_t yDirection = 0;
         for (int direction = 0; direction < 4; direction++) {
@@ -416,7 +433,7 @@ void handleReleasePiece(Vector2 mousePosition) {
         pieceToDelete->isTaken = true;
         board[destinationCol][destinationRow] = NULL;
     }
-    if (playerColor == PLAYER_WHITE) {
+    if (playerTurn == PLAYER_WHITE) {
         const BOARD_COLS previousCol = whitePieces[selectedPiece].piecePosition.colPosition;
         const BOARD_ROWS previousRow = whitePieces[selectedPiece].piecePosition.rowPosition;
         whitePieces[selectedPiece].piecePosition = (PiecePosition){destinationCol, destinationRow};
@@ -429,5 +446,5 @@ void handleReleasePiece(Vector2 mousePosition) {
         board[previousCol][previousRow] = NULL;
         board[destinationCol][destinationRow] = &blackPieces[selectedPiece];
     }
-    selectedPiece = TOTAL_PIECES_PER_TEAM;
+    handleEndTurn();
 }

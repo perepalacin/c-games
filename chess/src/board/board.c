@@ -9,7 +9,7 @@
 Texture2D atlas;
 bool isSpriteInitialized = false;
 extern uint8_t selectedPiece;
-extern PieceColor playerColor;
+extern PieceColor playerTurn;
 
 extern bool isDraggingPiece;
 
@@ -159,14 +159,14 @@ void renderBoard(Piece *whitePiece, Piece *blackPiece) {
             whitePiece++;
             continue;
         }
-        if (i == selectedPiece && playerColor == PLAYER_WHITE) {
+        if (i == selectedPiece && playerTurn == PLAYER_WHITE) {
             renderAura((PiecePosition){whitePiece->piecePosition.colPosition,
                                        whitePiece->piecePosition.rowPosition},
                        10, RED);
             renderPossibleMovements();
         }
         // TODO: move the dragged piece to the top!
-        if (isDraggingPiece && i == selectedPiece && playerColor == PLAYER_WHITE) {
+        if (isDraggingPiece && i == selectedPiece && playerTurn == PLAYER_WHITE) {
             renderDraggedPiece(whitePiece, GetMousePosition());
         } else {
             renderPiece(whitePiece->piecePosition.colPosition,
@@ -180,14 +180,14 @@ void renderBoard(Piece *whitePiece, Piece *blackPiece) {
             blackPiece++;
             continue;
         }
-        if (i == selectedPiece && playerColor == PLAYER_BLACK) {
+        if (i == selectedPiece && playerTurn == PLAYER_BLACK) {
             renderAura((PiecePosition){blackPiece->piecePosition.colPosition,
                                        blackPiece->piecePosition.rowPosition},
                        10, RED);
             renderPossibleMovements();
         }
-        if (isDraggingPiece && i == selectedPiece && playerColor == PLAYER_BLACK) {
-            renderDraggedPiece(whitePiece, GetMousePosition());
+        if (isDraggingPiece && i == selectedPiece && playerTurn == PLAYER_BLACK) {
+            renderDraggedPiece(blackPiece, GetMousePosition());
         } else {
             renderPiece(blackPiece->piecePosition.colPosition,
                         blackPiece->piecePosition.rowPosition, blackPiece->type, blackPiece->color);
