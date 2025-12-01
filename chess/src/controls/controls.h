@@ -2,4 +2,6 @@
 
 void handleKeyboardNavigation(void);
 void handleMouseNavigation(void);
+void handlePieceMouseMovement(void);
+
 #endif
