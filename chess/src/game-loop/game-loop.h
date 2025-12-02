@@ -9,4 +9,5 @@ void selectNextPiece(void);
 void selectPreviousPiece(void);
 void selectPieceByCoordinates(Vector2);
 void handleReleasePiece(Vector2 mousePosition);
+void handleEndTurn(void);
 #endif

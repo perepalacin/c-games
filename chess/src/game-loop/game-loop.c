@@ -1,6 +1,6 @@
 #include "./game-loop.h"
-#include "../board/board.h"
 #include "../controls/controls.h"
+#include "../game-history/game-history.h"
 #include "raylib.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -288,7 +288,7 @@ static void getRookPossibleMoves(const PiecePosition *currentPiecePosition) {
     }
 }
 
-static void handleEndTurn(void) {
+void handleEndTurn(void) {
     if (playerTurn == PLAYER_WHITE) {
         playerTurn = PLAYER_BLACK;
     } else {
@@ -433,18 +433,29 @@ void handleReleasePiece(Vector2 mousePosition) {
         pieceToDelete->isTaken = true;
         board[destinationCol][destinationRow] = NULL;
     }
+    BOARD_COLS previousCol;
+    BOARD_ROWS previousRow;
+    Piece *piece;
     if (playerTurn == PLAYER_WHITE) {
-        const BOARD_COLS previousCol = whitePieces[selectedPiece].piecePosition.colPosition;
-        const BOARD_ROWS previousRow = whitePieces[selectedPiece].piecePosition.rowPosition;
+        previousCol = whitePieces[selectedPiece].piecePosition.colPosition;
+        previousRow = whitePieces[selectedPiece].piecePosition.rowPosition;
+        piece = &whitePieces[selectedPiece];
         whitePieces[selectedPiece].piecePosition = (PiecePosition){destinationCol, destinationRow};
         board[previousCol][previousRow] = NULL;
         board[destinationCol][destinationRow] = &whitePieces[selectedPiece];
     } else {
-        const BOARD_COLS previousCol = blackPieces[selectedPiece].piecePosition.colPosition;
-        const BOARD_ROWS previousRow = blackPieces[selectedPiece].piecePosition.rowPosition;
+        previousCol = blackPieces[selectedPiece].piecePosition.colPosition;
+        previousRow = blackPieces[selectedPiece].piecePosition.rowPosition;
         blackPieces[selectedPiece].piecePosition = (PiecePosition){destinationCol, destinationRow};
+        piece = &blackPieces[selectedPiece];
         board[previousCol][previousRow] = NULL;
         board[destinationCol][destinationRow] = &blackPieces[selectedPiece];
     }
+    addMoveToHistory((PiecePosition){previousCol, previousRow},
+                     (PiecePosition){
+                         destinationCol,
+                         destinationRow,
+                     },
+                     piece);
     handleEndTurn();
 }

@@ -1,4 +1,5 @@
 #include "./controls.h"
+#include "../game-history/game-history.h"
 #include "../game-loop/game-loop.h"
 #include "raylib.h"
 #include <stdio.h>
@@ -12,6 +13,10 @@ void handleKeyboardNavigation(void) {
         selectPreviousPiece();
     } else if (IsKeyPressed(KEY_TAB)) {
         selectNextPiece();
+    } else if (IsKeyPressed(KEY_J)) {
+        revertMove();
+    } else if (IsKeyPressed(KEY_K)) {
+        forwardMove();
     }
 }
 
