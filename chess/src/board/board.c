@@ -155,6 +155,9 @@ void renderBoard(Piece *whitePiece, Piece *blackPiece) {
     Rectangle boardRectangle = {0, 0, 160, 144};
     DrawTextureRec(atlas, boardRectangle, (Vector2){0, 0}, WHITE);
     for (int i = 0; i < TOTAL_PIECES_PER_TEAM; i++) {
+        if (whitePiece->piecePosition.colPosition == COL_D &&
+            whitePiece->piecePosition.rowPosition == ROW_4) {
+        }
         if (whitePiece->isTaken) {
             whitePiece++;
             continue;

@@ -173,7 +173,6 @@ void selectPieceByCoordinates(Vector2 coordinates) {
         if (playerTurn == PLAYER_WHITE) {
             if (whitePieces[i].isTaken) {
                 continue;
-                ;
             }
             if (whitePieces[i].piecePosition.colPosition == selectedCol &&
                 selectedRow == whitePieces[i].piecePosition.rowPosition) {
@@ -184,7 +183,6 @@ void selectPieceByCoordinates(Vector2 coordinates) {
         if (playerTurn == PLAYER_BLACK) {
             if (blackPieces[i].isTaken) {
                 continue;
-                ;
             }
             if (blackPieces[i].piecePosition.colPosition == selectedCol &&
                 selectedRow == blackPieces[i].piecePosition.rowPosition) {
@@ -295,6 +293,7 @@ void handleEndTurn(void) {
         playerTurn = PLAYER_WHITE;
     }
     selectedPiece = TOTAL_PIECES_PER_TEAM;
+    piecePossibleMovementsCount = 0;
 }
 
 static void getPiecePossibleMovements(Piece *piece) {
@@ -428,9 +427,11 @@ void handleReleasePiece(Vector2 mousePosition) {
     if (!isValidMove) {
         return;
     }
+    Piece *takenPiece = NULL;
     if (checkIfPieceCanBeTaken(&(PiecePosition){destinationCol, destinationRow})) {
         Piece *pieceToDelete = board[destinationCol][destinationRow];
         pieceToDelete->isTaken = true;
+        takenPiece = pieceToDelete;
         board[destinationCol][destinationRow] = NULL;
     }
     BOARD_COLS previousCol;
@@ -456,6 +457,6 @@ void handleReleasePiece(Vector2 mousePosition) {
                          destinationCol,
                          destinationRow,
                      },
-                     piece);
+                     piece, takenPiece);
     handleEndTurn();
 }

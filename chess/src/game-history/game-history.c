@@ -6,7 +6,8 @@
 typedef struct Move {
     PiecePosition initialPosition;
     PiecePosition finalPosition;
-    Piece *piece;
+    Piece *movedPiece;
+    Piece *TakenPiece;
     struct Move *next;
     struct Move *prev;
 } Move;
@@ -16,7 +17,8 @@ Move *history_head = NULL;
 Move *history_tail = NULL;
 extern Piece *board[COL_COUNT][ROW_COUNT];
 
-void addMoveToHistory(PiecePosition initialPosition, PiecePosition finalPosition, Piece *piece) {
+void addMoveToHistory(PiecePosition initialPosition, PiecePosition finalPosition, Piece *movedPiece,
+                      Piece *takenPiece) {
     Move *newMove = (Move *)malloc(sizeof(Move));
     if (newMove == NULL) {
         fprintf(stderr, "Fatal: Memory allocation failed in addMoveToHistory.\n");
@@ -24,7 +26,8 @@ void addMoveToHistory(PiecePosition initialPosition, PiecePosition finalPosition
     }
     newMove->initialPosition = initialPosition;
     newMove->finalPosition = finalPosition;
-    newMove->piece = piece;
+    newMove->movedPiece = movedPiece;
+    newMove->TakenPiece = takenPiece;
     newMove->next = NULL;
     newMove->prev = NULL;
     if (history_head == NULL) {
@@ -44,10 +47,14 @@ void revertMove(void) {
     }
 
     // What if a piece was taken here?
-    moveToRevert->piece->piecePosition = moveToRevert->initialPosition;
-    board[moveToRevert->finalPosition.colPosition][moveToRevert->finalPosition.rowPosition] = NULL;
+    moveToRevert->movedPiece->piecePosition = moveToRevert->initialPosition;
+    board[moveToRevert->finalPosition.colPosition][moveToRevert->finalPosition.rowPosition] =
+        moveToRevert->TakenPiece != NULL ? moveToRevert->TakenPiece : NULL;
+    if (moveToRevert->TakenPiece != NULL) {
+        moveToRevert->TakenPiece->isTaken = false;
+    }
     board[moveToRevert->initialPosition.colPosition][moveToRevert->initialPosition.rowPosition] =
-        moveToRevert->piece;
+        moveToRevert->movedPiece;
     if (history_tail->prev != NULL) {
         history_tail = history_tail->prev;
     }
@@ -60,12 +67,17 @@ void forwardMove(void) {
     }
     Move *moveNodeToExecute = history_tail;
     // What if a piece was taken here?
-    moveNodeToExecute->piece->piecePosition = moveNodeToExecute->finalPosition;
+    moveNodeToExecute->movedPiece->piecePosition = moveNodeToExecute->finalPosition;
     board[moveNodeToExecute->initialPosition.colPosition]
          [moveNodeToExecute->initialPosition.rowPosition] = NULL;
+    if (moveNodeToExecute->TakenPiece != NULL) {
+        moveNodeToExecute->TakenPiece->isTaken = true;
+    }
     board[moveNodeToExecute->finalPosition.colPosition]
-         [moveNodeToExecute->finalPosition.rowPosition] = moveNodeToExecute->piece;
+         [moveNodeToExecute->finalPosition.rowPosition] = moveNodeToExecute->movedPiece;
     history_tail = moveNodeToExecute;
-    history_tail = history_tail->next;
+    if (history_tail->next != NULL) {
+        history_tail = history_tail->next;
+    }
     handleEndTurn();
 }
