@@ -69,18 +69,6 @@ const (
 	status
 )
 
-type PkmnMove struct {
-	name          string
-	totalPP       uint8
-	currentPP     uint8
-	moveType      PkmnType
-	category      CategoryKey
-	power         uint8
-	accuracy      uint8
-	probability   uint8
-	requiredLevel uint8
-}
-
 type PkmnStats struct {
 	HP        uint8
 	Attack    uint8
@@ -100,6 +88,7 @@ const (
 	Asleep
 	Frozen
 	Fainted
+	Sleep
 )
 
 type Pkmn struct {
@@ -118,6 +107,7 @@ type PkmnInCombat struct {
 	level        uint8
 	gender       Gender
 	nature       Nature
+	accuracy     int
 }
 
 type TrainerClass int
