@@ -1,5 +1,26 @@
 package core
 
+import "os"
+
+type Pkmn struct {
+	pokedexIndex    uint16
+	name            string
+	types           []PkmnType
+	baseStats       PkmnStats
+	compatibleMoves []PkmnMove
+}
+
+type PkmnInCombat struct {
+	pkmn         Pkmn
+	status       PkmnStatus
+	moves        []PkmnMove
+	currentStats PkmnStats
+	level        uint8
+	gender       Gender
+	nature       Nature
+	accuracy     int
+}
+
 type Pokemon int
 
 const (
@@ -114,4 +135,22 @@ var Pokedex = []Pkmn{
 			HP: 65, Attack: 65, Defense: 60, SpAttack: 110, SpDefense: 95, Speed: 130,
 		},
 	},
+}
+
+func createPokemonInCombat(pokedexIndex int) PkmnInCombat {
+	if pokedexIndex >= len(Pokedex) {
+		os.Exit(1)
+	}
+	selectedPkmn := Pokedex[pokedexIndex]
+
+	return PkmnInCombat{
+		pkmn:         selectedPkmn,
+		status:       Healthy,
+		moves:        []PkmnMove{},
+		currentStats: selectedPkmn.baseStats,
+		level:        50,
+		gender:       Female,
+		nature:       Quiet,
+		accuracy:     100,
+	}
 }

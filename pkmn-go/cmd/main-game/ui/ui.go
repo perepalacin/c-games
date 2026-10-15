@@ -1,8 +1,9 @@
-package menu
+package ui
 
 import rl "github.com/gen2brain/raylib-go/raylib"
 
 var menuTextures rl.Texture2D
+var backgroundTextures rl.Texture2D
 
 type menuPossibleState int
 
@@ -56,20 +57,24 @@ var MainMenuSelectionSprites = []MenuSprites{
 }
 
 func LoadMenuSprites() {
-	menuTextures = rl.LoadTexture("images/combat-sprites.png")
+	menuTextures = rl.LoadTexture("../../images/combat-sprites.png")
+	backgroundTextures = rl.LoadTexture("../../images/combat-bg.png")
 }
 
 func UnloadMenuSprites() {
 	rl.UnloadTexture(menuTextures)
+	rl.UnloadTexture(backgroundTextures)
 }
 
-func RenderMenu() {
+func RenderUi() {
 	switch menuState {
 	case mainMenu:
 		rl.DrawTextureRec(menuTextures, MenuBgSprites["MainMenu"].spriteSelectionRectangle, MenuBgSprites["MainMenu"].screenPosition, rl.White)
 	case combatMenu:
 		rl.DrawTextureRec(menuTextures, MenuBgSprites["CombatMenu"].spriteSelectionRectangle, MenuBgSprites["CombatMenu"].screenPosition, rl.White)
 	}
+
+	renderBackground()
 	handleRenderMenuSelectors()
 	handleMenuInput()
 }
@@ -112,4 +117,9 @@ func handleRenderMenuSelectors() {
 	if menuState == mainMenu {
 		rl.DrawTextureRec(menuTextures, MainMenuSelectionSprites[mainMenuPosition].spriteSelectionRectangle, MainMenuSelectionSprites[mainMenuPosition].screenPosition, rl.White)
 	}
+}
+
+func renderBackground() {
+	rl.DrawTextureRec(backgroundTextures, CombatBackgroundSprites[0].spriteSelectionRectangle, CombatBackgroundSprites[0].screenPosition, rl.White)
+	rl.DrawTextureRec(backgroundTextures, enemyCircleSprites[0].spriteSelectionRectangle, enemyCircleSprites[0].screenPosition, rl.White)
 }

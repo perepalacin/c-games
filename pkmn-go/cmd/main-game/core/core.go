@@ -91,25 +91,6 @@ const (
 	Sleep
 )
 
-type Pkmn struct {
-	pokedexIndex    uint16
-	name            string
-	types           []PkmnType
-	baseStats       PkmnStats
-	compatibleMoves []PkmnMove
-}
-
-type PkmnInCombat struct {
-	pkmn         Pkmn
-	status       PkmnStatus
-	moves        []PkmnMove
-	currentStats PkmnStats
-	level        uint8
-	gender       Gender
-	nature       Nature
-	accuracy     int
-}
-
 type TrainerClass int
 
 const (
@@ -183,7 +164,10 @@ var Trainer1 = Trainer{
 	variant:  Collector,
 	gender:   male,
 	isPlayer: false,
-	pkmns:    []PkmnInCombat{},
+	pkmns: []PkmnInCombat{
+		createPokemonInCombat(int(charizard)),
+		createPokemonInCombat(int(dragonite)),
+	},
 }
 
 var Player1 = Trainer{
@@ -191,5 +175,8 @@ var Player1 = Trainer{
 	variant:  Player,
 	gender:   male,
 	isPlayer: true,
-	pkmns:    []PkmnInCombat{},
+	pkmns: []PkmnInCombat{
+		createPokemonInCombat(int(pikachu)),
+		createPokemonInCombat(int(lapras)),
+	},
 }
